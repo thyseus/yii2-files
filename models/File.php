@@ -29,7 +29,9 @@ class File extends ActiveRecord
 
     public function downloadLink()
     {
-        return Html::a(Yii::t('app', 'Download'), ['/files/file/download', 'id' => $this->id], ['class' => 'btn btn-default']);
+        return Html::a(Yii::t('app', 'Download'),
+            ['/files/file/download', 'id' => $this->id],
+            ['class' => 'btn btn-default', 'data-pjax' => '0']);
     }
 
     public function behaviors()
@@ -51,6 +53,8 @@ class File extends ActiveRecord
     public function rules()
     {
         return [
+            [['public'], 'default', 'value' => 0],
+            [['public'], 'integer'],
             [['filename_path', 'filename_user', 'model', 'target_id', 'target_url', 'mimetype'], 'string'],
         ];
     }
@@ -66,6 +70,7 @@ class File extends ActiveRecord
             'updated_by' => Yii::t('files', 'updated by'),
             'created_at' => Yii::t('files', 'created at'),
             'updated_at' => Yii::t('files', 'updated at'),
+            'public' => Yii::t('files', 'public'),
             'model' => Yii::t('files', 'model'),
             'target_id' => Yii::t('files', 'Target'),
             'filename_path' => Yii::t('files', 'filename_path'),

@@ -21,6 +21,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $model->downloadLink(); ?>
 
+                <?php
+                if ($model->public) {
+                    echo Yii::t('files', 'File is public.') . Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['class' => 'btn btn-default']);
+                } else {
+                    echo Yii::t('files', 'File is protected.') . Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['class' => 'btn btn-default']);
+                }
+                ?>
+
                 <?= Html::a(Yii::t('files', 'Remove file'), ['/files/file/delete', 'id' => $model->id],
                     ['class' => 'btn btn-danger', 'data-confirm' => 'Are you sure?']);
 
@@ -31,7 +39,9 @@ $this->params['breadcrumbs'][] = $this->title;
             echo DetailView::widget([
                 'model' => $model,
                 'attributes' => [
-                    ['label' => 'Target',
+                    [
+                        'label' => 'Target',
+                        'format' => 'html',
                         'value' => function ($data) {
                             if ($data->target) {
                                 $identifierAttribute = 'id';
@@ -58,6 +68,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'visible' => Yii::$app->user->can('admin'),
                     ],
                     'status',
+                    [
+                        'attribute' => 'public',
+                        'value' => $model->public ? Yii::t('files', 'Yes') : Yii::t('files', 'No'),
+                    ],
                     'mimetype',
                     [
                         'format' => 'html',

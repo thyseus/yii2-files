@@ -1,5 +1,17 @@
 <?php
 return [
+    'Yes' => 'Ja',
+    'No' => 'Nein',
+    'public' => 'Öffentlich',
+    'File is now public' => 'Datei ist nun öffentlich verfügbar',
+    'File is now protected' => 'Datei ist nun geschützt',
+    'File is public.' => 'Datei ist öffentlich verfügbar',
+    'File is protected.' => 'Datei ist geschützt',
+    'Remove file' => 'Datei entfernen',
+    'Are you Sure?' => 'Sind Sie sicher?',
+    'File is now Protected' => 'Datei ist nun geschützt',
+    'Make protected.' => 'Datei schützen',
+    'Make public.' => 'Datei veröffentlichen',
     'files' => 'dateien',
     'Files' => 'Dateien',
     'id' => '#',

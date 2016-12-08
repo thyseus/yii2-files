@@ -11,6 +11,16 @@ use yii\data\ActiveDataProvider;
  */
 class FileSearch extends File
 {
+
+    public static function mimeTypesGrouped()
+    {
+        $mimetypes = [];
+        foreach(File::find()->groupBy('mimetype')->all() as $file)
+            $mimetypes[$file->mimetype] = $file->mimetype;
+
+        return $mimetypes;
+    }
+
     /**
      * Creates data provider instance with search query applied
      *
@@ -35,6 +45,7 @@ class FileSearch extends File
             'created_by' => Yii::$app->user->can('admin') ? null : Yii::$app->user->id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'public' => $this->public,
         ]);
 
         $query->andFilterWhere(['like', 'filename_user', $this->filename_user]);

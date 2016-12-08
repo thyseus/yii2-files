@@ -1,5 +1,7 @@
 <?php
 
+use thyseus\files\models\File;
+use thyseus\files\models\FileSearch;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -45,22 +47,36 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'owner.username',
             ],
             [
+                'filter' => FileSearch::mimeTypesGrouped(),
                 'attribute' => 'mimetype',
             ],
-            ['format' => 'html',
-            'header' => Yii::t('files', 'Download'),
-            'value' => function ($data) {
-                return $data->downloadLink();
-            }
+            [
+                'filter' => [0 => Yii::t('files', 'No'), 1 => Yii::t('files', 'Yes')],
+                'attribute' => 'public',
+                'format' => 'html',
+                'value' => function($model) {
+                    if($model->public) {
+                        return Yii::t('files', 'File is public.'). Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['class' => 'btn btn-default']);
+                    } else {
+                        return Yii::t('files', 'File is protected.') . Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['class' => 'btn btn-default']);
+                    }
+                }
+            ],
+            [
+                'format' => 'raw',
+                'header' => Yii::t('files', 'Download'),
+                'value' => function ($data) {
+                    return $data->downloadLink();
+                }
+            ],
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'template' => '{view} {delete}',
+                'urlCreator' => function ($action, $model, $key, $index) {
+                    return Url::to(['file/' . $action, 'id' => $model->id]);
+                }
+            ],
         ],
-        [
-            'class' => 'yii\grid\ActionColumn',
-            'template' => '{view} {delete}',
-            'urlCreator' => function ($action, $model, $key, $index) {
-                return Url::to(['file/' . $action, 'id' => $model->id]);
-            }
-        ],
-    ],
     ]); ?>
     <?php Pjax::end(); ?>
 </div>

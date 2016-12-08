@@ -10,6 +10,7 @@ use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
+
 /**
  * FileController implements the CRUD actions for File model.
  */
@@ -26,7 +27,7 @@ class FileController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'delete', 'upload', 'download'],
+                        'actions' => ['index', 'view', 'delete', 'upload', 'download', 'protect', 'publish'],
                         'roles' => ['@'],
                     ],
                 ],
@@ -50,21 +51,22 @@ class FileController extends Controller
     }
 
     /**
-     * Checks permission and downloads the requested file, if possible
+     * Publishes a File (sets public to true)
      * @return mixed
      */
-    public function actionDownload($id)
+    public function actionPublish($id)
     {
         $model = $this->findModel($id);
 
         if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
             throw new ForbiddenHttpException;
 
-        header("Content-Type: $model->mimetype");
+        if ($model->updateAttributes(['public' => 1]))
+            Yii::$app->getSession()->setFlash('success', Yii::t('files', 'File is now public'));
+        else
+            Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be made public'));
 
-        header("Content-Disposition: attachment; filename=\"$model->filename_user\"");
-
-        readfile($model->filename_path);
+        $this->redirect(['index']);
     }
 
     /**
@@ -81,6 +83,49 @@ class FileController extends Controller
         } else {
             throw new NotFoundHttpException(Yii::t('files', 'The requested file does not exist.'));
         }
+    }
+
+    /**
+     * Protects a File (sets public to false)
+     * @return mixed
+     */
+    public function actionProtect($id)
+    {
+        $model = $this->findModel($id);
+
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+            throw new ForbiddenHttpException;
+
+        if ($model->updateAttributes(['public' => 0]))
+            Yii::$app->getSession()->setFlash('success', Yii::t('files', 'File is now protected'));
+        else
+            Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be protected'));
+
+        $this->redirect(['index']);
+    }
+
+    /**
+     * Checks permission and downloads the requested file, if possible.
+     * Set $raw to false to get the raw file content rather than a download.
+     *   * @return mixed
+     */
+    public function actionDownload($id, $raw = false)
+    {
+        $model = $this->findModel($id);
+
+        if (!$model->public)
+            if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+                throw new ForbiddenHttpException;
+
+        header("Content-Type: $model->mimetype");
+
+        if (!$raw)
+            header("Content-Disposition: attachment; filename=\"$model->filename_user\"");
+
+        if (!file_exists($model->filename_path))
+            throw new yii\web\NotFoundHttpException;
+
+        echo readfile($model->filename_path);
     }
 
     /**
