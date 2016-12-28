@@ -44,9 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'filename_user',
             [
-                'attribute' => 'owner.username',
-            ],
-            [
                 'filter' => FileSearch::mimeTypesGrouped(),
                 'attribute' => 'mimetype',
             ],

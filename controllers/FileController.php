@@ -66,7 +66,7 @@ class FileController extends Controller
         else
             Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be made public'));
 
-        $this->redirect(['index']);
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     /**
@@ -101,7 +101,7 @@ class FileController extends Controller
         else
             Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be protected'));
 
-        $this->redirect(['index']);
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     /**
@@ -217,6 +217,6 @@ class FileController extends Controller
         else
             throw new ForbiddenHttpException;
 
-        return $this->redirect(['index']);
+        return $this->redirect(Yii::$app->request->referrer);
     }
 }

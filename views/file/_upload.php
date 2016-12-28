@@ -1,6 +1,6 @@
 <?php
 
-use kartik\widgets\FileInput;
+use kartik\file\FileInput;
 use yii\helpers\Url;
 
 if (!isset($pluginOptions))
