@@ -8,17 +8,11 @@ class HasFilesBehavior extends Behavior
 {
     public function getFiles()
     {
-        if (\Yii::$app->user->isGuest)
-            return $this;
-        else {
-            $identifierAttribute = 'id';
+        $identifierAttribute = 'id';
 
-            if(method_exists($this->owner, 'identifierAttribute'))
-                $identifierAttribute = $this->owner->identifierAttribute();
+        if (method_exists($this->owner, 'identifierAttribute'))
+            $identifierAttribute = $this->owner->identifierAttribute();
 
-            return $this->owner
-                ->hasMany(File::className(), ['target_id' => $identifierAttribute])
-                ->onCondition(['created_by' => \Yii::$app->user->id]);
-        }
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute]);
     }
 }
