@@ -20,4 +20,5 @@ echo FileInput::widget([
     'name' => 'files',
     'options' => isset($options) ? $options : [],
     'pluginOptions' => $pluginOptions,
+    'pluginEvents' => isset($pluginEvents) ? $pluginEvents : [],
 ]);

@@ -10,7 +10,6 @@ use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
-
 /**
  * FileController implements the CRUD actions for File model.
  */
