@@ -26,6 +26,11 @@ class FileController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
+                        'actions' => ['download'],
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'allow' => true,
                         'actions' => ['index', 'view', 'delete', 'upload', 'download', 'protect', 'publish'],
                         'roles' => ['@'],
                     ],
@@ -122,7 +127,7 @@ class FileController extends Controller
             header("Content-Disposition: attachment; filename=\"$model->filename_user\"");
 
         if (!file_exists($model->filename_path))
-            throw new yii\web\NotFoundHttpException;
+            throw new NotFoundHttpException;
 
         echo readfile($model->filename_path);
     }
