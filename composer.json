@@ -4,6 +4,7 @@
     "keywords": ["yii2", "yii2-files"],
     "type": "yii2-extension",
     "license": "GPLv3",
+    "version": "0.1.0",
     "support": {
         "issues": "https://github.com/thyseus/yii2-files/issues?state=open",
         "forum": "https://gitter.im/thyseus/yii2-files",
@@ -16,11 +17,11 @@
             "homepage": "https://github.com/thyseus/yii2-files"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require": {
         "yiisoft/yii2": "^2.0.0",
         "yiisoft/yii2-bootstrap": "^2.0.0",
-        "kartik-v/yii2-widget-fileinput": "@dev"
+        "kartik-v/yii2-widget-fileinput": "1.0.*"
     },
     "autoload": {
         "psr-4": {
