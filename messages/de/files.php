@@ -33,4 +33,7 @@ return [
     'The requested file does not exist.' => 'Die angeforderte Datei existiert nicht mehr,',
     'The File has been added' => 'Die Datei wurde hinzugefügt',
     'The File could not be added.' => 'Die Datei konnte nicht hinzugefügt werden',
+    'Crop Image' => 'Bild zuschneiden',
+    'Actions' => 'Aktionen',
+    'Choosen file is not an image. File can not be cropped.' => 'Gewählte Datei ist kein Bild. Datei kann nicht zugeschnitten werden.',
 ];

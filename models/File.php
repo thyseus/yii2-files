@@ -7,6 +7,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 /**
  * This is the model class for table "file".
@@ -30,8 +31,18 @@ class File extends ActiveRecord
     public function downloadLink()
     {
         return Html::a(Yii::t('app', 'Download'),
-            ['/files/file/download', 'id' => $this->id],
-            ['class' => 'btn btn-default', 'data-pjax' => '0']);
+            $this->downloadUrl(),
+            ['data-pjax' => '0']);
+    }
+
+    public function downloadUrl()
+    {
+        return Url::to(['//files/file/download', 'id' => $this->id]);
+    }
+
+    public function isImage()
+    {
+        return strpos($this->mimetype, 'image') !== false;
     }
 
     public function behaviors()

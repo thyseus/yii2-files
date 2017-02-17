@@ -2,10 +2,14 @@
 
 namespace thyseus\files\controllers;
 
+use Imagine\Image\Box;
+use Imagine\Image\ImageInterface;
+use Imagine\Image\Point;
 use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use Yii;
 use yii\filters\AccessControl;
+use yii\imagine\Image;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -31,7 +35,7 @@ class FileController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'delete', 'upload', 'download', 'protect', 'publish'],
+                        'actions' => ['index', 'view', 'delete', 'upload', 'download', 'protect', 'publish', 'crop'],
                         'roles' => ['@'],
                     ],
                 ],
@@ -48,10 +52,34 @@ class FileController extends Controller
         $searchModel = new FileSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        Yii::$app->user->setReturnUrl(['//files/file/index']);
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    /**
+     * Allow users to crop their uploaded images. Uses https://github.com/demisang/yii2-cropper
+     * @return mixed
+     */
+    public function actionCrop($id, $x = null, $y = null, $width = null, $height = null)
+    {
+        $model = $this->findModel($id);
+
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+            throw new ForbiddenHttpException;
+
+        if($x && $y && $width && $height) {
+            Image::frame($model->filename_path)
+                ->crop(new Point($x, $y), new Box($width, $height))
+                ->save($model->filename_path);
+
+            return $this->goBack();
+        }
+
+        return $this->render('crop', ['model' => $model]);
     }
 
     /**
@@ -197,6 +225,8 @@ class FileController extends Controller
     public function actionView($id)
     {
         $file = $this->findModel($id);
+
+        Yii::$app->user->setReturnUrl(['//files/file/view', 'id' => $id]);
 
         if (Yii::$app->user->id != $file->created_by && !Yii::$app->user->can('admin'))
             throw new ForbiddenHttpException;

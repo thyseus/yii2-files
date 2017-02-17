@@ -36,6 +36,11 @@ class FileWebModule extends \yii\base\Module
 
     public $uploadPath = null;
 
+    public $cropperOptions = [
+        'modal' => false,
+        'aspectRatio' => 4 / 3,
+    ];
+
 
     /** @var array The rules to be used in URL management. */
     public $urlRules = [

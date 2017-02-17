@@ -9,23 +9,26 @@ use yii\widgets\DetailView;
 $this->title = $model->filename_user;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="sitecontent-view">
+<div class="file-view">
 
     <div class="row">
         <div class="row-lg-12">
             <h1><?= Html::encode($this->title) ?></h1>
 
             <p>
-                <input action="action" type="button" class="btn btn-primary" value="<?= Yii::t('files', 'Back'); ?>"
-                       onclick="history.go(-1);"/>
+                <a href="" onclick="history.go(-1);"> <?= Yii::t('files', 'Back'); ?> </a>
 
                 <?= $model->downloadLink(); ?>
 
+                <?php if($model->isImage()) {
+                    echo Html::a(Yii::t('files', 'Crop Image'), ['crop', 'id' => $model->id]);
+                } ?>
+
                 <?php
                 if ($model->public) {
-                    echo Yii::t('files', 'File is public.') . Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['class' => 'btn btn-default']);
+                    echo Yii::t('files', 'File is public.') . Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], []);
                 } else {
-                    echo Yii::t('files', 'File is protected.') . Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['class' => 'btn btn-default']);
+                    echo Yii::t('files', 'File is protected.') . Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], []);
                 }
                 ?>
 
@@ -35,7 +38,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ?>
             </p>
             <?php
-
             echo DetailView::widget([
                 'model' => $model,
                 'attributes' => [
@@ -80,6 +82,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ]);
             ?>
+
+            <?php if($model->isImage()): ?>
+                <img src="<?= $model->downloadUrl(); ?>" alt="image" />
+            <?php endif ?>
+
         </div>
     </div>
 </div>

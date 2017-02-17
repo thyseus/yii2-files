@@ -1,5 +1,6 @@
 <?php
 
+use demi\cropper\Cropper;
 use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use yii\grid\GridView;
@@ -53,17 +54,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'html',
                 'value' => function($model) {
                     if($model->public) {
-                        return Yii::t('files', 'File is public.'). Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['class' => 'btn btn-default']);
+                        return Yii::t('files', 'File is public.'). '.<br />' . Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['data-pjax' => '0']);
                     } else {
-                        return Yii::t('files', 'File is protected.') . Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['class' => 'btn btn-default']);
+                        return Yii::t('files', 'File is protected.') . '.<br />'. Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['data-pjax' => '0']);
                     }
                 }
             ],
             [
                 'format' => 'raw',
-                'header' => Yii::t('files', 'Download'),
+                'header' => Yii::t('files', 'Actions'),
                 'value' => function ($data) {
-                    return $data->downloadLink();
+                    $actions = '';
+                    if($data->isImage())
+
+                        $cropperOptions = array_merge(Yii::$app->getModule('files')->cropperOptions, [
+                            'cropUrl' => ['//files/file/crop', 'id' => $data->id],
+                            'image' => $data->downloadUrl(),
+                        ]);
+                    $actions .= Cropper::widget($cropperOptions);
+                    $actions .= $data->downloadLink();
+
+                    return $actions;
                 }
             ],
             [
