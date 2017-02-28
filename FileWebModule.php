@@ -36,9 +36,14 @@ class FileWebModule extends \yii\base\Module
 
     public $uploadPath = null;
 
+    /**
+     * @var int Which target size should the cropped images be
+     */
+    public $crop_target_width = 128;
+    public $crop_target_height = 128;
+
     public $cropperOptions = [
         'modal' => false,
-        'aspectRatio' => 4 / 3,
     ];
 
 

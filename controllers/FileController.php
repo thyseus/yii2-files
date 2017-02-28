@@ -70,17 +70,21 @@ class FileController extends Controller
 
         if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
             throw new ForbiddenHttpException;
-        
-         if($x && $y && $width && $height) {         
-            $imagine = new \Imagine\Gd\Imagine();             
-            $box_resize = new Box(200, 140);
-            
-            $box_crop = new Box($width, $height);            
-            $imagine->open($model->filename_path)                
-                ->crop(new Point($x, $y), $box_crop)                    
+
+        if($x && $y && $width && $height) {
+            $imagine = new \Imagine\Gd\Imagine();
+
+            $crop_target_width = Yii::$app->getModule('files')->crop_target_width;
+            $crop_target_height = Yii::$app->getModule('files')->crop_target_height;
+
+            $box_crop = new Box($width, $height);
+            $box_resize = new Box($crop_target_width, $crop_target_height);
+
+            $imagine->open($model->filename_path)
+                ->crop(new Point($x, $y), $box_crop)
                 ->resize($box_resize)
                 ->save($model->filename_path);
-            
+
             return $this->goBack();
         }
 
