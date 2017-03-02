@@ -28,16 +28,16 @@ class File extends ActiveRecord
         return 'files';
     }
 
-    public function downloadLink()
+    public function downloadLink($raw = false)
     {
         return Html::a(Yii::t('app', 'Download'),
-            $this->downloadUrl(),
+            $this->downloadUrl($raw),
             ['data-pjax' => '0']);
     }
 
-    public function downloadUrl()
+    public function downloadUrl($raw = false)
     {
-        return Url::to(['//files/file/download', 'id' => $this->id]);
+        return Url::to(['//files/file/download', 'id' => $this->id, 'raw' => $raw]);
     }
 
     public function isImage()

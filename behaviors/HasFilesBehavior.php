@@ -6,6 +6,11 @@ use yii\base\Behavior;
 
 class HasFilesBehavior extends Behavior
 {
+    /**
+     * Attaches an relation 'files' to the owner model.
+     *
+     * @return yii\db\ActiveQuery
+     */
     public function getFiles()
     {
         $identifierAttribute = 'id';

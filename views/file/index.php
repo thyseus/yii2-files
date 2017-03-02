@@ -65,13 +65,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => Yii::t('files', 'Actions'),
                 'value' => function ($data) {
                     $actions = '';
-                    if($data->isImage())
 
-                        $cropperOptions = array_merge(Yii::$app->getModule('files')->cropperOptions, [
-                            'cropUrl' => ['//files/file/crop', 'id' => $data->id],
-                            'image' => $data->downloadUrl(),
-                        ]);
-                    $actions .= Cropper::widget($cropperOptions);
+                    if($data->isImage()) {
+                        $actions .= Html::a(Yii::t('files', 'Crop Image'), ['//files/file/crop', 'id' => $data->id]) . '<br>';
+
                     $actions .= $data->downloadLink();
 
                     return $actions;
