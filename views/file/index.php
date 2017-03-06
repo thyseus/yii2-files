@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($data) {
                     $actions = '';
 
-                    if($data->isImage()) {
+                    if($data->isImage())
                         $actions .= Html::a(Yii::t('files', 'Crop Image'), ['//files/file/crop', 'id' => $data->id]) . '<br>';
 
                     $actions .= $data->downloadLink();
