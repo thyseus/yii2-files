@@ -36,4 +36,6 @@ return [
     'Crop Image' => 'Bild zuschneiden',
     'Actions' => 'Aktionen',
     'Choosen file is not an image. File can not be cropped.' => 'Gewählte Datei ist kein Bild. Datei kann nicht zugeschnitten werden.',
+    'Image' => 'Bild',
+    'Preview' => 'Vorschau',
 ];

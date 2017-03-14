@@ -2,14 +2,11 @@
 
 namespace thyseus\files\controllers;
 
-use Imagine\Image\Box;
-use Imagine\Image\ImageInterface;
-use Imagine\Image\Point;
 use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use Yii;
 use yii\filters\AccessControl;
-use yii\imagine\Image;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -35,12 +32,50 @@ class FileController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'delete', 'upload', 'download', 'protect', 'publish', 'crop'],
+                        'actions' => ['index', 'view', 'delete', 'upload', 'upload-raw', 'download', 'protect', 'publish', 'crop'],
                         'roles' => ['@'],
                     ],
                 ],
             ],
         ];
+    }
+
+    /**
+     * Receive raw data and write to file. Usually used with the cropping function.
+     * Thanks to drew010´s answer on
+     * http://stackoverflow.com/questions/11511511/how-to-save-a-png-image-server-side-from-a-base64-data-string
+     *
+     * @param $id id of the file to be written into
+     * @throws BadRequestHttpException if raw-data is not set properly
+     * @throws ForbiddenHttpException if currently logged in user is not the owner of the file
+     */
+    public function actionUploadRaw($id)
+    {
+        $model = $this->findModel($id);
+
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+            throw new ForbiddenHttpException;
+
+        if (!isset($_POST['raw-data']))
+            throw new BadRequestHttpException('Raw data is not given properly');
+
+        file_put_contents($model->filename_path, base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['raw-data'])));
+    }
+
+    /**
+     * Finds the File model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param string $id
+     * @return File the loaded model
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    protected function findModel($id)
+    {
+        if (($model = File::findOne(['id' => $id])) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException(Yii::t('files', 'The requested file does not exist.'));
+        }
     }
 
     /**
@@ -71,23 +106,6 @@ class FileController extends Controller
         if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
             throw new ForbiddenHttpException;
 
-        if($x && $y && $width && $height) {
-            $imagine = new \Imagine\Gd\Imagine();
-
-            $crop_target_width = Yii::$app->getModule('files')->crop_target_width;
-            $crop_target_height = Yii::$app->getModule('files')->crop_target_height;
-
-            $box_crop = new Box($width, $height);
-            $box_resize = new Box($crop_target_width, $crop_target_height);
-
-            $imagine->open($model->filename_path)
-                ->crop(new Point($x, $y), $box_crop)
-                ->resize($box_resize)
-                ->save($model->filename_path);
-
-            return $this->goBack();
-        }
-
         return $this->render('crop', ['model' => $model]);
     }
 
@@ -108,22 +126,6 @@ class FileController extends Controller
             Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be made public'));
 
         return $this->redirect(Yii::$app->request->referrer);
-    }
-
-    /**
-     * Finds the File model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $id
-     * @return File the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        if (($model = File::findOne(['id' => $id])) !== null) {
-            return $model;
-        } else {
-            throw new NotFoundHttpException(Yii::t('files', 'The requested file does not exist.'));
-        }
     }
 
     /**
