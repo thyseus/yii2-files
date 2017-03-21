@@ -30,7 +30,8 @@ class File extends ActiveRecord
 
     public function downloadLink($raw = false)
     {
-        return Html::a(Yii::t('app', 'Download'),
+        return Html::a(
+            '<span class="glyphicon glyphicon-download" aria-hidden="true"></span> ' . Yii::t('app', 'Download'),
             $this->downloadUrl($raw),
             ['data-pjax' => '0']);
     }
@@ -86,6 +87,7 @@ class File extends ActiveRecord
             'target_id' => Yii::t('files', 'Target'),
             'filename_path' => Yii::t('files', 'filename_path'),
             'filename_user' => Yii::t('files', 'filename_user'),
+            'mimetype' => Yii::t('files', 'File format'),
         ];
     }
 

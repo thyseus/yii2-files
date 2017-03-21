@@ -38,4 +38,6 @@ return [
     'Choosen file is not an image. File can not be cropped.' => 'Gewählte Datei ist kein Bild. Datei kann nicht zugeschnitten werden.',
     'Image' => 'Bild',
     'Preview' => 'Vorschau',
+    'File format' => 'Dateiformat',
+    'Delete File' => 'Datei löschen',
 ];

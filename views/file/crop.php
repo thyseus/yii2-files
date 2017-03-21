@@ -46,8 +46,9 @@ $crop_target_height = Yii::$app->getModule('files')->crop_target_height;
 
                 $this->registerJs("
                     $('.crop-submit').click(function(e) {
-                        result = $('.cropper-image').cropper('getCroppedCanvas');
+                        result = $('.cropper-image').cropper('getCroppedCanvas', {width: $crop_target_width, height: $crop_target_height} );
                         $('.img-preview').html(result);
+                        $('.img-preview canvas').first().width(240);
                         $.post('$img_receive_url', {'raw-data': ($('.img-preview canvas')[0]).toDataURL()});
                         window.location = '" . Yii::$app->request->referrer . "';
                  });

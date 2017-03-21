@@ -1,11 +1,8 @@
 <?php
 
-use demi\cropper\Cropper;
-use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use yii\grid\GridView;
 use yii\helpers\Html;
-use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 
@@ -26,8 +23,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'columns' => [
-            ['class' => 'yii\grid\SerialColumn'],
-            ['attribute' => 'created_at', 'filter' => false],
+            [
+                'attribute' => 'created_at',
+                'filter' => false,
+                'format' => 'datetime'
+            ],
+            'filename_user',
             [
                 'filter' => false,
                 'format' => 'html',
@@ -43,7 +44,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 },
             ],
-            'filename_user',
             [
                 'filter' => FileSearch::mimeTypesGrouped(),
                 'attribute' => 'mimetype',
@@ -52,11 +52,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => [0 => Yii::t('files', 'No'), 1 => Yii::t('files', 'Yes')],
                 'attribute' => 'public',
                 'format' => 'html',
-                'value' => function($model) {
-                    if($model->public) {
-                        return Yii::t('files', 'File is public.'). '.<br />' . Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['data-pjax' => '0']);
+                'value' => function ($model) {
+                    if ($model->public) {
+                        return '<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> ' . Yii::t('files', 'File is public.') . '.<br />' . Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['data-pjax' => '0']);
                     } else {
-                        return Yii::t('files', 'File is protected.') . '.<br />'. Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['data-pjax' => '0']);
+                        return '<span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> ' . Yii::t('files', 'File is protected.') . '.<br />' . Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['data-pjax' => '0']);
                     }
                 }
             ],
@@ -66,19 +66,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($data) {
                     $actions = '';
 
-                    if($data->isImage())
-                        $actions .= Html::a(Yii::t('files', 'Crop Image'), ['//files/file/crop', 'id' => $data->id]) . '<br>';
+                    if ($data->isImage())
+                        $actions .= Html::a(
+                                '<span class="glyphicon glyphicon-scissors" aria-hidden="true"></span> ' . Yii::t('files', 'Crop Image'),
+                                ['//files/file/crop', 'id' => $data->id]) . '<br>';
 
-                    $actions .= $data->downloadLink();
+                    $actions .= $data->downloadLink() . '<br>';
+                    $actions .= Html::a(
+                        '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> ' . Yii::t('files', 'Delete File'),
+                        ['//files/file/delete', 'id' => $data->id], [
+                        'data-method' => 'POST',
+                        'data-confirm' => Yii::t('files', 'Are you Sure?'),
+                    ]);
 
                     return $actions;
-                }
-            ],
-            [
-                'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {delete}',
-                'urlCreator' => function ($action, $model, $key, $index) {
-                    return Url::to(['file/' . $action, 'id' => $model->id]);
                 }
             ],
         ],
