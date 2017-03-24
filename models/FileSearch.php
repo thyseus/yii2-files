@@ -12,10 +12,15 @@ use yii\data\ActiveDataProvider;
 class FileSearch extends File
 {
 
-    public static function mimeTypesGrouped()
+    public static function mimeTypesGrouped($user_id = null)
     {
+        if(!$user_id) {
+            $user_id = Yii::$app->user->id;
+        }
+
         $mimetypes = [];
-        foreach(File::find()->groupBy('mimetype')->all() as $file)
+
+        foreach(File::find()->where(['created_by' => $user_id])->groupBy('mimetype')->all() as $file)
             $mimetypes[$file->mimetype] = $file->mimetype;
 
         return $mimetypes;
