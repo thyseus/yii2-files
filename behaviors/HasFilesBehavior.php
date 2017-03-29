@@ -7,7 +7,7 @@ use yii\base\Behavior;
 class HasFilesBehavior extends Behavior
 {
     /**
-     * Attaches an relation 'files' to the owner model.
+     * Attaches an relation 'files' to the owner model that retrieves all files.
      *
      * @return yii\db\ActiveQuery
      */
@@ -19,5 +19,35 @@ class HasFilesBehavior extends Behavior
             $identifierAttribute = $this->owner->identifierAttribute();
 
         return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute]);
+    }
+
+    /**
+     * Attaches an relation 'filesPublic' to the owner model that retrieves all public files.
+     *
+     * @return yii\db\ActiveQuery
+     */
+    public function getFilesPublic()
+    {
+        $identifierAttribute = 'id';
+
+        if (method_exists($this->owner, 'identifierAttribute'))
+            $identifierAttribute = $this->owner->identifierAttribute();
+
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.public' => 1]);
+    }
+
+    /**
+     * Attaches an relation 'filesProtected' to the owner model that retrieves all protected files.
+     *
+     * @return yii\db\ActiveQuery
+     */
+    public function getFilesProtected()
+    {
+        $identifierAttribute = 'id';
+
+        if (method_exists($this->owner, 'identifierAttribute'))
+            $identifierAttribute = $this->owner->identifierAttribute();
+
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.public' => 0]);
     }
 }
