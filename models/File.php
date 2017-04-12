@@ -28,12 +28,20 @@ class File extends ActiveRecord
         return 'files';
     }
 
-    public function downloadLink($raw = false)
+    /**
+     * Returns an link that downloads the file.
+     * @param bool $raw 
+     * @param string $caption optional: the caption for the link.
+     * @return string
+     */
+    public function downloadLink($raw = false, $caption = false)
     {
-        return Html::a(
-            '<span class="glyphicon glyphicon-download" aria-hidden="true"></span> ' . Yii::t('app', 'Download'),
-            $this->downloadUrl($raw),
-            ['data-pjax' => '0']);
+        if (!$caption) {
+            $innerHtml = '<span class="glyphicon glyphicon-download" aria-hidden="true"></span> ' . Yii::t('app', 'Download');
+        } else {
+            $innerHtml = $caption;
+        }
+        return Html::a($innerHtml, $this->downloadUrl($raw), ['data-pjax' => '0']);
     }
 
     public function downloadUrl($raw = false)
