@@ -28,6 +28,11 @@ class File extends ActiveRecord
         return 'files';
     }
 
+    public function __toString()
+    {
+        return $this->filename_path;
+    }
+
     /**
      * Returns an link that downloads the file.
      * @param bool $raw 

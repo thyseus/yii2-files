@@ -50,4 +50,19 @@ class HasFilesBehavior extends Behavior
 
         return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.public' => 0]);
     }
+
+    /**
+     * Attaches an method 'filesFromUser(<id>)' to the owner model that retrieves all files that are owned by this user.
+     *
+     * @return yii\db\ActiveQuery
+     */
+    public function filesFromUser($id)
+    {
+        $identifierAttribute = 'id';
+
+        if (method_exists($this->owner, 'identifierAttribute'))
+            $identifierAttribute = $this->owner->identifierAttribute();
+
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.created_by' => $id])->all();
+    }
 }
