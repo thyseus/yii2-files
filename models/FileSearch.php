@@ -20,7 +20,7 @@ class FileSearch extends File
 
         $mimetypes = [];
 
-        foreach(File::find()->where(['created_by' => $user_id])->groupBy('mimetype')->all() as $file)
+        foreach(File::find()->select('mimetype')->where(['created_by' => $user_id])->groupBy('mimetype')->all() as $file)
             $mimetypes[$file->mimetype] = $file->mimetype;
 
         return $mimetypes;

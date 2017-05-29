@@ -12,6 +12,6 @@ class m161208_101931_add_public_column extends Migration
 
     public function down()
     {
-        $this->dropolumn('{{%files}}', 'public');
+        $this->dropColumn('{{%files}}', 'public');
     }
 }
