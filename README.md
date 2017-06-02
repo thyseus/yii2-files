@@ -67,6 +67,7 @@ echo $this->render('@vendor/thyseus/yii2-files/views/file/_upload', [
     'model' => $model,
     'options' => ['multiple' => true], // optional
     'target_url' => Url::to(['agency/view', 'id' => $model->slug]), // optional
+    'uploadExtraData' => ['public' => true] // uploaded files are automatically public (default is: protected). optional.
 ]);
 ```
 

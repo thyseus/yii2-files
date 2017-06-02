@@ -1,12 +1,13 @@
 <?php
 
 use kartik\file\FileInput;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
 if (!isset($pluginOptions))
     $pluginOptions = [];
 
-$pluginOptions = array_merge($pluginOptions, [
+$pluginOptions = ArrayHelper::merge($pluginOptions, [
     'uploadUrl' => Url::to(Yii::$app->getModule('files')->uploadUrl),
     'uploadExtraData' => [
         'model' => $model::className(),

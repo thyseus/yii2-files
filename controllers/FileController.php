@@ -201,7 +201,8 @@ class FileController extends Controller
                             'mimetype' => $file['type'],
                             'model' => isset($_POST['model']) ? $_POST['model'] : '',
                             'target_id' => isset($_POST['target_id']) ? $_POST['target_id'] : '',
-                            'target_url' => isset($_POST['target_url']) ? $_POST['target_url'] : '',
+			    'target_url' => isset($_POST['target_url']) ? $_POST['target_url'] : '',
+			    'public' => isset($_POST['public']) && $_POST['public'] == true,
                         ],
                     ]);
 
