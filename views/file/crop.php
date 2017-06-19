@@ -51,6 +51,14 @@ $crop_target_height = Yii::$app->getModule('files')->crop_target_height;
                          style="border: 1px solid; overflow: hidden;width:<?= $crop_target_width; ?>px;height:<?= $crop_target_width; ?>px;"></div>
                     <hr>
 
+                    <a class="btn btn-primary btn-rotate-left" href="#" title="Rotate Left">
+                        <span class="glyphicon glyphicon-chevron-left"></span>
+                    </a>
+
+                    <a class="btn btn-primary btn-rotate-right" href="#" title="Rotate Right">
+                        <span class="glyphicon glyphicon-chevron-right"></span>
+                    </a>
+
                     <a class="btn btn-primary btn-zoom-out" href="#" title="Zoom Out">
                         <span class="glyphicon glyphicon-minus"></span>
                     </a>
@@ -86,12 +94,14 @@ $crop_target_height = Yii::$app->getModule('files')->crop_target_height;
     </div>
 
 <?php $this->registerJs("
+   $('a.btn-rotate-left').click(function() { $('.cropper-image').cropper('rotate', -45); } );
+   $('a.btn-rotate-right').click(function() { $('.cropper-image').cropper('rotate', 45); } );
    $('a.btn-zoom-out').click(function() { $('.cropper-image').cropper('zoom', -0.1); } );
    $('a.btn-zoom-in').click(function() { $('.cropper-image').cropper('zoom', 0.1); } );
    $('a.btn-zoom-reset').click(function() { $('.cropper-image').cropper('reset'); } );
    $('a.btn-flip-horizontal').click(function() { $('.cropper-image').cropper('scaleX', -1); } );
    $('a.btn-flip-vertical').click(function() { $('.cropper-image').cropper('scaleY', -1); } );
-   
+
     $('a.crop-submit').click(function(e) {
         result = $('.cropper-image').cropper('getCroppedCanvas', {width: $crop_target_width, height: $crop_target_height} );
         $('.img-preview').html(result);
