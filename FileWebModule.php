@@ -34,14 +34,24 @@ class FileWebModule extends \yii\base\Module
      */
     public $uploadUrl = ['/files/file/upload'];
 
+    /**
+     * @var string Physical directory where the upload files should be saved. Make sure the folder exists.
+     * by default (value null) the files get saved outside of the web/ directory for security reasons.
+     * This default is Yii::$app->basePath . '/uploads'
+     * If you want ALL files to be public accessible, you can change the path here.
+     */
     public $uploadPath = null;
 
     /**
-     * @var int Which target size should the cropped images be
+     * @var int Which target size should the cropped images be? Set both values to null to disable cropping.
      */
     public $crop_target_width = 128;
     public $crop_target_height = 128;
 
+    /**
+     * @var array options for the cropper. Make sure to keep 'modal' => false, since we do not use the
+     * modal feature of the demicropper.
+     */
     public $cropperOptions = [
         'modal' => false,
     ];
@@ -61,13 +71,9 @@ class FileWebModule extends \yii\base\Module
      */
     public function init()
     {
-        /**
-         * @var string Physical directory where the upload files should be saved. Make sure the folder exists.
-         * by default the files get saved outside of the web/ directory for security reasons. If you want the files to
-         * be public accessible, you can change the path here.
-         */
-        if(!$this->uploadPath)
-            $this->uploadPath = Yii::$app->basePath. '/uploads';
+        if (!$this->uploadPath) {
+            $this->uploadPath = Yii::$app->basePath . '/uploads';
+        }
 
         if (!isset(Yii::$app->get('i18n')->translations['files*'])) {
             Yii::$app->get('i18n')->translations['files*'] = [

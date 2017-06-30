@@ -53,11 +53,13 @@ class FileController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin')) {
             throw new ForbiddenHttpException;
+        }
 
-        if (!isset($_POST['raw-data']))
+        if (!isset($_POST['raw-data'])) {
             throw new BadRequestHttpException('Raw data is not given properly');
+        }
 
         file_put_contents($model->filename_path, base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $_POST['raw-data'])));
     }
@@ -219,12 +221,17 @@ class FileController extends Controller
                             'mimetype' => $file['type'],
                             'model' => isset($_POST['model']) ? $_POST['model'] : '',
                             'target_id' => isset($_POST['target_id']) ? $_POST['target_id'] : '',
-			    'target_url' => isset($_POST['target_url']) ? $_POST['target_url'] : '',
-			    'public' => isset($_POST['public']) && $_POST['public'] == true,
+                            'target_url' => isset($_POST['target_url']) ? $_POST['target_url'] : '',
+                            'public' => isset($_POST['public']) && $_POST['public'] == true,
                         ],
                     ]);
 
                     $success = $file->save();
+
+                    if ($file->isImage() && $this->module->crop_target_width && $this->module->crop_target_height) {
+                        $file->crop();
+                    }
+
                     $paths[] = $target;
                 }
             }
