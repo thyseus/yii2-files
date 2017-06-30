@@ -78,8 +78,9 @@ class File extends ActiveRecord
     public function rules()
     {
         return [
-            [['public'], 'default', 'value' => 0],
-            [['public'], 'integer'],
+            [['public', 'status'], 'default', 'value' => 0],
+            [['position'], 'default', 'value' => 1000],
+            [['public', 'position', 'status'], 'integer'],
             [['filename_path', 'filename_user', 'model', 'target_id', 'target_url', 'mimetype'], 'string'],
         ];
     }
@@ -101,6 +102,7 @@ class File extends ActiveRecord
             'filename_path' => Yii::t('files', 'filename_path'),
             'filename_user' => Yii::t('files', 'filename_user'),
             'mimetype' => Yii::t('files', 'File format'),
+            'position' => Yii::t('files', 'Position'),
         ];
     }
 

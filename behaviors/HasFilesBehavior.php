@@ -18,7 +18,7 @@ class HasFilesBehavior extends Behavior
         if (method_exists($this->owner, 'identifierAttribute'))
             $identifierAttribute = $this->owner->identifierAttribute();
 
-        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute]);
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->orderBy('position ASC');
     }
 
     /**
@@ -33,7 +33,7 @@ class HasFilesBehavior extends Behavior
         if (method_exists($this->owner, 'identifierAttribute'))
             $identifierAttribute = $this->owner->identifierAttribute();
 
-        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.public' => 1]);
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.public' => 1])->orderBy('position ASC');
     }
 
     /**
@@ -48,7 +48,7 @@ class HasFilesBehavior extends Behavior
         if (method_exists($this->owner, 'identifierAttribute'))
             $identifierAttribute = $this->owner->identifierAttribute();
 
-        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.public' => 0]);
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.public' => 0])->orderBy('position ASC');
     }
 
     /**
@@ -63,6 +63,6 @@ class HasFilesBehavior extends Behavior
         if (method_exists($this->owner, 'identifierAttribute'))
             $identifierAttribute = $this->owner->identifierAttribute();
 
-        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.created_by' => $id])->all();
+        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.created_by' => $id])->orderBy('position ASC')->all();
     }
 }

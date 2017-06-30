@@ -61,6 +61,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'attribute' => 'position',
+                'format' => 'html',
+                'value' => function($data) {
+                    $str = $data->position . '&nbsp;';
+                    $str .= Html::a('<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>',
+                        ['move', 'id' => $data->id, 'dir' => 'up']) . '&nbsp;';
+                    $str .= Html::a('<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>',
+                            ['move', 'id' => $data->id, 'dir' => 'down']) . '&nbsp;';
+                    return $str;
+                },
+            ],
+            [
                 'format' => 'raw',
                 'header' => Yii::t('files', 'Actions'),
                 'value' => function ($data) {

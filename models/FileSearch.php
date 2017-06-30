@@ -51,6 +51,8 @@ class FileSearch extends File
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'public' => $this->public,
+            'position' => $this->position,
+            'status' => $this->status,
         ]);
 
         $query->andFilterWhere(['like', 'filename_user', $this->filename_user]);

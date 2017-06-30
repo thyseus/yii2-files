@@ -32,7 +32,7 @@ class FileController extends Controller
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'delete', 'upload', 'upload-raw', 'download', 'protect', 'publish', 'crop'],
+                        'actions' => ['index', 'view', 'delete', 'upload', 'upload-raw', 'download', 'protect', 'publish', 'crop', 'move'],
                         'roles' => ['@'],
                     ],
                 ],
@@ -76,6 +76,24 @@ class FileController extends Controller
         } else {
             throw new NotFoundHttpException(Yii::t('files', 'The requested file does not exist.'));
         }
+    }
+
+
+    /**
+     * Changes the position of a file by direction (up or down)
+     * @return mixed
+     */
+    public function actionMove($id, $dir, $inc = 1)
+    {
+        $model = $this->findModel($id);
+
+        if ($dir == 'up') {
+            $inc = -1 * abs($inc);
+        }
+
+        $model->updateCounters(['position' => $inc]);
+
+        return $this->redirect(Yii::$app->request->referrer);
     }
 
     /**
