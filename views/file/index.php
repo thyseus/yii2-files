@@ -72,6 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $str;
                 },
             ],
+            'download_count',
             [
                 'format' => 'raw',
                 'header' => Yii::t('files', 'Actions'),

@@ -1,5 +1,6 @@
 <?php
 return [
+    'Download count' => 'Anzahl Downloads',
     'Yes' => 'Ja',
     'No' => 'Nein',
     'public' => 'Öffentlich',

@@ -170,9 +170,10 @@ class FileController extends Controller
     /**
      * Checks permission and downloads the requested file, if possible.
      * Set $raw to false to get the raw file content rather than a download.
-     *   * @return mixed
+     * Increments the download_count of the requested file by one, if valid.
+     * @return mixed
      */
-    public function actionDownload($id, $raw = false)
+    public function actionDownload(int $id, bool $raw = false)
     {
         $model = $this->findModel($id);
 
@@ -182,13 +183,17 @@ class FileController extends Controller
 
         header("Content-Type: $model->mimetype");
 
-        if (!$raw)
-            header("Content-Disposition: attachment; filename=\"$model->filename_user\"");
-
-        if (!file_exists($model->filename_path))
+        if (!file_exists($model->filename_path)) {
             throw new NotFoundHttpException;
+        }
+
+        if (!$raw) {
+            header("Content-Disposition: attachment; filename=\"$model->filename_user\"");
+        }
 
         echo readfile($model->filename_path);
+
+        $model->updateCounters(['download_count' => 1]);
     }
 
     /**

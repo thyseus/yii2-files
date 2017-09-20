@@ -115,7 +115,9 @@ class File extends ActiveRecord
         return [
             [['public', 'status'], 'default', 'value' => 0],
             [['position'], 'default', 'value' => 1000],
-            [['public', 'position', 'status'], 'integer'],
+            [['download_count'], 'default', 'value' => 0],
+            [['status'], 'default', 'value' => 0],
+            [['public', 'position', 'status', 'download_count'], 'integer'],
             [['filename_path', 'filename_user', 'model', 'target_id', 'target_url', 'mimetype'], 'string'],
         ];
     }
@@ -138,13 +140,15 @@ class File extends ActiveRecord
             'filename_user' => Yii::t('files', 'filename_user'),
             'mimetype' => Yii::t('files', 'File format'),
             'position' => Yii::t('files', 'Position'),
+            'download_count' => Yii::t('files', 'Download count'),
         ];
     }
 
     public function afterDelete()
     {
-        if (Yii::$app->getModule('files')->deletePhysically)
+        if (Yii::$app->getModule('files')->deletePhysically) {
             unlink($this->filename_path);
+        }
 
         parent::afterDelete();
     }
