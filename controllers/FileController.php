@@ -2,11 +2,13 @@
 
 namespace thyseus\files\controllers;
 
+use thyseus\files\FileWebModule;
 use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
@@ -321,7 +323,20 @@ class FileController extends Controller
 
         return $this->render('view', [
             'model' => $file,
+            'users' => $this->determineShareableUsers(),
         ]);
+    }
+
+    /**
+     * Which users should be able to be choosen when selecting files to share with.
+     * @see FileWebModule shareableUsersCallback
+     */
+    public function determineShareableUsers() {
+        if (is_callable(Yii::$app->getModule('files')->shareableUsersCallback)) {
+            return call_user_func(Yii::$app->getModule('files')->shareableUsersCallback);
+        } else {
+            return ArrayHelper::map(\app\Models\User::find()->all(), 'username', 'username');
+        }
     }
 
     /**

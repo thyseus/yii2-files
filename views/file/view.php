@@ -105,7 +105,7 @@ $owner = $model->created_by == Yii::$app->user->id;
             <?php } else { ?>
                 <div class="alert alert-warning"><p><?= Yii::t('files', 'File is protected'); ?>.</p></div>
 
-                <?= $this->render('_shared_with', ['model' => $model]); ?>
+                <?= $this->render('_shared_with', ['model' => $model, 'users' => $users]); ?>
 
                 <br>
 

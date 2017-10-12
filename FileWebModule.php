@@ -56,6 +56,20 @@ class FileWebModule extends \yii\base\Module
         'modal' => false,
     ];
 
+    /**
+     * @var string Callback that defines which users choosable to share files with.
+     *
+     * For example, to allow only username foo and bar, do this:
+     *
+     * 'shareableUsersCallback' => function ($users) {
+     *    return array_filter($users, function ($user) {
+     *      return !in_array($user->username, ['foo', 'bar']); // or !$user->isAdmin()
+     *    });
+     *  },
+     *
+     */
+    public $shareableUsersCallback = null;
+
     /** @var array The rules to be used in URL management. */
     public $urlRules = [
         'files/update/<id>' => 'files/files/update',
