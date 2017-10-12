@@ -96,6 +96,22 @@ echo File::downloadLink();
 
 to display a "Download file" button in the view file.
 
+## Events
+
+You can attach events to most of the actions, for example to send a notification once a user gets
+access to a shared file, like this:
+
+```php
+use yii\base\Event;
+use thyseus\files\controllers\FileController;
+
+Event::on(FileController::className(), FileController::EVENT_AFTER_SHARE_WITH_USER, function ($event) {
+    $username = $event->sender->actionParams['username'];
+    
+    Message::sendNotification($username); // <-- you need to implement this
+});
+```
+
 ## Routes
 
 You can use the following routes to access the files module:

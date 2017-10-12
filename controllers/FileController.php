@@ -19,6 +19,25 @@ use yii\web\NotFoundHttpException;
  */
 class FileController extends Controller
 {
+    // Event definitions:
+    const EVENT_BEFORE_PROTECT = 'before_protect';
+    const EVENT_AFTER_PROTECT = 'after_protect';
+
+    const EVENT_BEFORE_UPLOAD = 'before_upload';
+    const EVENT_AFTER_UPLOAD = 'after_upload';
+
+    const EVENT_BEFORE_DELETE = 'before_upload';
+    const EVENT_AFTER_DELETE = 'after_upload';
+
+    const EVENT_BEFORE_PUBLISH = 'before_publish';
+    const EVENT_AFTER_PUBLISH = 'after_publish';
+
+    const EVENT_BEFORE_CROP = 'before_crop';
+    const EVENT_AFTER_CROP = 'after_crop';
+
+    const EVENT_BEFORE_SHARE_WITH_USER = 'before_share_with_user';
+    const EVENT_AFTER_SHARE_WITH_USER = 'after_share_with_user';
+
     /**
      * @inheritdoc
      */
@@ -132,10 +151,15 @@ class FileController extends Controller
      */
     public function actionCrop($id, $x = null, $y = null, $width = null, $height = null)
     {
+        $this->trigger(self::EVENT_BEFORE_CROP);
+
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin')) {
             throw new ForbiddenHttpException;
+        }
+
+        $this->trigger(self::EVENT_BEFORE_CROP);
 
         return $this->render('crop', ['model' => $model]);
     }
@@ -146,6 +170,8 @@ class FileController extends Controller
      */
     public function actionPublish($id)
     {
+        $this->trigger(self::EVENT_BEFORE_PUBLISH);
+
         $model = $this->findModel($id);
 
         if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin')) {
@@ -160,6 +186,8 @@ class FileController extends Controller
                 Yii::t('files', 'File could not be made public'));
         }
 
+        $this->trigger(self::EVENT_AFTER_PUBLISH);
+
         return $this->redirect(Yii::$app->request->referrer);
     }
 
@@ -169,6 +197,8 @@ class FileController extends Controller
      */
     public function actionProtect($id)
     {
+        $this->trigger(self::EVENT_BEFORE_PROTECT);
+
         $model = $this->findModel($id);
 
         if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin')) {
@@ -180,6 +210,8 @@ class FileController extends Controller
         } else {
             Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be protected'));
         }
+
+        $this->trigger(self::EVENT_AFTER_PROTECT);
 
         return $this->redirect(Yii::$app->request->referrer);
     }
@@ -249,6 +281,8 @@ class FileController extends Controller
             return $this->render('upload');
         }
 
+        $this->trigger(self::EVENT_BEFORE_UPLOAD);
+
         if (empty($_FILES['files'])) {
             echo json_encode(['error' => Yii::t('files', 'No files found for upload.')]);
             return;
@@ -302,6 +336,8 @@ class FileController extends Controller
             }
         }
 
+        $this->trigger(self::EVENT_AFTER_UPLOAD);
+
         echo json_encode($output);
     }
 
@@ -350,6 +386,8 @@ class FileController extends Controller
      */
     public function actionShareWithUser(int $file_id, bool $add, string $username = null)
     {
+        $this->trigger(self::EVENT_BEFORE_SHARE_WITH_USER);
+
         $post = Yii::$app->request->post();
 
         $file = $this->findModel($file_id);
@@ -384,6 +422,8 @@ class FileController extends Controller
                 ]));
         }
 
+        $this->trigger(self::EVENT_AFTER_SHARE_WITH_USER);
+
         return $this->redirect(Yii::$app->request->referrer);
     }
 
@@ -395,6 +435,8 @@ class FileController extends Controller
      */
     public function actionDelete($id)
     {
+        $this->trigger(self::EVENT_BEFORE_DELETE);
+
         $file = $this->findModel($id);
 
         if (Yii::$app->user->id == $file->created_by || Yii::$app->user->can('admin')) {
@@ -402,6 +444,8 @@ class FileController extends Controller
         } else {
             throw new ForbiddenHttpException;
         }
+
+        $this->trigger(self::EVENT_AFTER_DELETE);
 
         return $this->redirect(Yii::$app->request->referrer);
     }
