@@ -5,7 +5,6 @@ use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
-
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\SitecontentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -17,6 +16,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
+    <?= Html::a(Yii::t('files', 'Upload new File'), ['upload'], ['class' => 'btn btn-primary']); ?>
+
+    <hr>
+
     <?php Pjax::begin(); ?>
 
     <?= GridView::widget([
@@ -26,7 +29,17 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'created_at',
                 'filter' => false,
-                'format' => 'datetime'
+                'format' => 'date'
+            ],
+            [
+                'attribute' => 'display_shared_files',
+                'filter' => [
+                    0 => Yii::t('files', 'Only my own files'),
+                    1 => Yii::t('files', 'Files shared with me'),
+                ],
+                'value' => function ($model, $key, $index, $column) {
+                    return $model->owner->username;
+                },
             ],
             'filename_user',
             [
@@ -45,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             [
-                'filter' => FileSearch::mimeTypesGrouped(),
+                'filter' => Yii::$app->user->can('admin') ? FileSearch::mimeTypesGrouped(-1) : FileSearch::mimeTypesGrouped(),
                 'attribute' => 'mimetype',
             ],
             [
@@ -53,44 +66,80 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'public',
                 'format' => 'html',
                 'value' => function ($model) {
-                    if ($model->public) {
-                        return '<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> ' . Yii::t('files', 'File is public.') . '.<br />' . Html::a(Yii::t('files', 'Make protected.'), ['//files/file/protect', 'id' => $model->id], ['data-pjax' => '0']);
-                    } else {
-                        return '<span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> ' . Yii::t('files', 'File is protected.') . '.<br />' . Html::a(Yii::t('files', 'Make public.'), ['//files/file/publish', 'id' => $model->id], ['data-pjax' => '0']);
+                    $owner = $model->created_by == Yii::$app->user->id;
+                    if ($owner) {
+                        if ($model->public) {
+                            return '<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span> '
+                                . Yii::t('files', 'File is public')
+                                . '.<br />'
+                                . Html::a(
+                                    Yii::t('files', 'Make protected'),
+                                    ['//files/file/protect', 'id' => $model->id],
+                                    ['data-pjax' => '0']);
+                        } else {
+                            return '<span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> '
+                                . Yii::t('files', 'File is protected')
+                                . '.<br />'
+                                . Html::a(
+                                    Yii::t('files', 'Configure shares'),
+                                    ['//files/file/view', 'id' => $model->id],
+                                    ['data-pjax' => '0'])
+                                . '<br />'
+                                . Html::a(
+                                    Yii::t('files', 'Make public'),
+                                    ['//files/file/publish', 'id' => $model->id],
+                                    ['data-pjax' => '0']);
+                        }
                     }
                 }
             ],
             [
                 'attribute' => 'position',
                 'format' => 'html',
-                'value' => function($data) {
-                    $str = $data->position . '&nbsp;';
-                    $str .= Html::a('<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>',
-                        ['move', 'id' => $data->id, 'dir' => 'up']) . '&nbsp;';
-                    $str .= Html::a('<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>',
-                            ['move', 'id' => $data->id, 'dir' => 'down']) . '&nbsp;';
+                'value' => function ($model) {
+                    $owner = $model->created_by == Yii::$app->user->id;
+                    $str = $model->position . '<br>';
+                    if ($owner) {
+                        $str .= Html::a('<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span>',
+                                ['move', 'id' => $model->id, 'dir' => 'up']) . '&nbsp;';
+                        $str .= Html::a('<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span>',
+                                ['move', 'id' => $model->id, 'dir' => 'down']) . '&nbsp;';
+                    }
                     return $str;
                 },
             ],
-            'download_count',
+            [
+                'attribute' => 'download_count',
+                'filter' => false,
+                'headerOptions' => ['style' => 'width:50px;'],
+            ],
             [
                 'format' => 'raw',
                 'header' => Yii::t('files', 'Actions'),
-                'value' => function ($data) {
+                'value' => function ($model) {
+                    $owner = $model->created_by == Yii::$app->user->id;
                     $actions = '';
 
-                    if ($data->isImage())
-                        $actions .= Html::a(
+                    if ($model->isImage())
+                        $actions .= '<nobr>' . Html::a(
                                 '<span class="glyphicon glyphicon-scissors" aria-hidden="true"></span> ' . Yii::t('files', 'Crop Image'),
-                                ['//files/file/crop', 'id' => $data->id]) . '<br>';
+                                ['//files/file/crop', 'id' => $model->id]) . '</nobr><br>';
 
-                    $actions .= $data->downloadLink() . '<br>';
-                    $actions .= Html::a(
-                        '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> ' . Yii::t('files', 'Delete File'),
-                        ['//files/file/delete', 'id' => $data->id], [
-                        'data-method' => 'POST',
-                        'data-confirm' => Yii::t('files', 'Are you Sure?'),
-                    ]);
+                    $actions .= $model->downloadLink() . '<br>';
+                    $actions .= '<nobr>' . Html::a(
+                            '<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> ' . Yii::t('files', 'Properties'),
+                            ['//files/file/view', 'id' => $model->id], [
+                            'data-pjax' => '0',
+                        ]) . '</nobr><br>';
+                    if ($owner) {
+                        $actions .= '<nobr>' . Html::a(
+                                '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> ' . Yii::t('files', 'Delete File'),
+                                ['//files/file/delete', 'id' => $model->id], [
+                                'data-pjax' => '0',
+                                'data-method' => 'POST',
+                                'data-confirm' => Yii::t('files', 'Are you Sure?'),
+                            ]) . '</nobr>';
+                    }
 
                     return $actions;
                 }

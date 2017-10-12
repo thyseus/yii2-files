@@ -140,10 +140,17 @@ class File extends ActiveRecord
             'filename_user' => Yii::t('files', 'filename_user'),
             'mimetype' => Yii::t('files', 'File format'),
             'position' => Yii::t('files', 'Position'),
-            'download_count' => Yii::t('files', 'Download count'),
+            'download_count' => Yii::t('files', 'Downloads'),
+            'tags' => Yii::t('files', 'Tags'),
+            'shared_with' => Yii::t('files', 'Shared with'),
+            'display_shared_files' => Yii::t('files', 'Uploaded by'),
         ];
     }
 
+    /**
+     * Ensure that files are also removed physically from the hard drive when the option
+     * is set in the module configuration
+     */
     public function afterDelete()
     {
         if (Yii::$app->getModule('files')->deletePhysically) {
@@ -153,7 +160,18 @@ class File extends ActiveRecord
         parent::afterDelete();
     }
 
+    /**
+     * Deserialize shared_with column
+     */
+    public function afterFind()
+    {
+        $this->shared_with = explode(', ', $this->shared_with);
+       return parent::afterFind();
+    }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getOwner()
     {
         return $this->hasOne(Yii::$app->getModule('files')->userModelClass, ['id' => 'created_by']);
@@ -165,6 +183,10 @@ class File extends ActiveRecord
      */
     public function getTarget()
     {
+        if (!$this->model) {
+            return null;
+        }
+
         $targetClass = $this->model;
 
         $target = new $targetClass;

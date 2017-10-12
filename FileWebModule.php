@@ -10,7 +10,7 @@ use yii\i18n\PhpMessageSource;
  */
 class FileWebModule extends \yii\base\Module
 {
-    public $version = '0.1.0-dev';
+    public $version = '0.3.0';
 
     /**
      * @inheritdoc
@@ -55,7 +55,6 @@ class FileWebModule extends \yii\base\Module
     public $cropperOptions = [
         'modal' => false,
     ];
-
 
     /** @var array The rules to be used in URL management. */
     public $urlRules = [

@@ -6,13 +6,14 @@ use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use Yii;
 use yii\filters\AccessControl;
+use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
- * FileController implements the CRUD actions for File model.
+ * FileController implements all actions for the yii2-files module.
  */
 class FileController extends Controller
 {
@@ -27,14 +28,22 @@ class FileController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['download'],
+                        'actions' => ['download'], // Files are potentially public
                         'roles' => ['?'],
                     ],
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view', 'delete', 'upload', 'upload-raw', 'download', 'protect', 'publish', 'crop', 'move'],
+                        'actions' => ['index', 'view', 'delete', 'upload', 'upload-raw',
+                            'download', 'protect', 'publish', 'crop', 'move', 'share-with-user'],
                         'roles' => ['@'],
                     ],
+                ],
+            ],
+
+            'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'share_with_user' => ['POST'],
                 ],
             ],
         ];
@@ -137,13 +146,17 @@ class FileController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin')) {
             throw new ForbiddenHttpException;
+        }
 
-        if ($model->updateAttributes(['public' => 1]))
-            Yii::$app->getSession()->setFlash('success', Yii::t('files', 'File is now public'));
-        else
-            Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be made public'));
+        if ($model->updateAttributes(['public' => 1])) {
+            Yii::$app->getSession()->setFlash('success',
+                Yii::t('files', 'File is now public'));
+        } else {
+            Yii::$app->getSession()->setFlash('error',
+                Yii::t('files', 'File could not be made public'));
+        }
 
         return $this->redirect(Yii::$app->request->referrer);
     }
@@ -156,13 +169,15 @@ class FileController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin')) {
             throw new ForbiddenHttpException;
+        }
 
-        if ($model->updateAttributes(['public' => 0]))
+        if ($model->updateAttributes(['public' => 0])) {
             Yii::$app->getSession()->setFlash('success', Yii::t('files', 'File is now protected'));
-        else
+        } else {
             Yii::$app->getSession()->setFlash('error', Yii::t('files', 'File could not be protected'));
+        }
 
         return $this->redirect(Yii::$app->request->referrer);
     }
@@ -177,9 +192,9 @@ class FileController extends Controller
     {
         $model = $this->findModel($id);
 
-        if (!$model->public)
-            if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin'))
-                throw new ForbiddenHttpException;
+        if (!$this->checkAccessPermission($model)) {
+            throw new ForbiddenHttpException;
+        }
 
         header("Content-Type: $model->mimetype");
 
@@ -197,11 +212,41 @@ class FileController extends Controller
     }
 
     /**
-     * Endpoint to receive an uploaded file.
+     * Check if the file can be downloaded by the requesting user.
+     * @param $model the model to check
+     */
+    public function checkAccessPermission($model)
+    {
+        if ($model->public) {
+            return true;
+        }
+
+        if (!Yii::$app->user->isGuest && in_array(Yii::$app->user->identity->username, $model->shared_with)) {
+            return true;
+        }
+
+        if ($model->created_by == Yii::$app->user->id) {
+            return true;
+        }
+
+        if (Yii::$app->user->can('admin')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * When GET request, this will render the file upload form.
+     * When POST request, this is the Endpoint to receive an uploaded file.
      * @return mixed
      */
     public function actionUpload()
     {
+        if (Yii::$app->request->isGet) {
+            return $this->render('upload');
+        }
+
         if (empty($_FILES['files'])) {
             echo json_encode(['error' => Yii::t('files', 'No files found for upload.')]);
             return;
@@ -268,10 +313,11 @@ class FileController extends Controller
     {
         $file = $this->findModel($id);
 
-        Yii::$app->user->setReturnUrl(['//files/file/view', 'id' => $id]);
-
-        if (Yii::$app->user->id != $file->created_by && !Yii::$app->user->can('admin'))
+        if (!$this->checkAccessPermission($file)) {
             throw new ForbiddenHttpException;
+        }
+
+        Yii::$app->user->setReturnUrl(['//files/file/view', 'id' => $id]);
 
         return $this->render('view', [
             'model' => $file,
@@ -279,8 +325,56 @@ class FileController extends Controller
     }
 
     /**
+     * Share a file with an specific user.
+     * The file id is provided by the GET param $file_id, while
+     * the user is provided by the POST param user, since it is provided
+     * by a drop down list.
+     * @param $file_id the file that should be shared with the user
+     * @param $add shall the user be added (1) or removed (!= 1) from the shared list
+     * @throws ForbiddenHttpException
+     */
+    public function actionShareWithUser(int $file_id, bool $add, string $username = null)
+    {
+        $post = Yii::$app->request->post();
+
+        $file = $this->findModel($file_id);
+
+        if (Yii::$app->user->id != $file->created_by && !Yii::$app->user->can('admin')) {
+            throw new ForbiddenHttpException;
+        }
+
+        if (!$username) {
+            $username = $post['username'];
+        }
+
+        $shared_with = $file->shared_with;
+
+        if ($add == 1) {
+            $shared_with[] = $username;
+            $shared_with = array_unique($shared_with);
+            $file->updateAttributes(['shared_with' => implode(', ', $shared_with)]);
+            Yii::$app->getSession()->setFlash('success',
+                Yii::t('files', 'File has been shared with {username}.', [
+                'username' => $username,
+            ]));
+        } else {
+            if(($key = array_search($username, $shared_with)) !== false) {
+                unset($shared_with[$key]);
+            }
+            $shared_with = array_unique($shared_with);
+            $file->updateAttributes(['shared_with' => implode(', ', $shared_with)]);
+            Yii::$app->getSession()->setFlash('success',
+                Yii::t('files', 'File is no longer shared with {username}.', [
+                    'username' => $username,
+                ]));
+        }
+
+        return $this->redirect(Yii::$app->request->referrer);
+    }
+
+    /**
      * Deletes an existing File model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
+     * If deletion is successful, the browser will be redirected to the referrer.
      * @param string $id
      * @return mixed
      */
@@ -288,10 +382,11 @@ class FileController extends Controller
     {
         $file = $this->findModel($id);
 
-        if (Yii::$app->user->id == $file->created_by || Yii::$app->user->can('admin'))
+        if (Yii::$app->user->id == $file->created_by || Yii::$app->user->can('admin')) {
             $file->delete();
-        else
+        } else {
             throw new ForbiddenHttpException;
+        }
 
         return $this->redirect(Yii::$app->request->referrer);
     }

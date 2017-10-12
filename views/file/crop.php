@@ -10,6 +10,7 @@ use yii\helpers\Url;
 /* @var $model app\models\Sitecontent */
 
 $this->title = $model->filename_user;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('files', 'Files'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 
 $cropperOptions = ArrayHelper::merge(Yii::$app->getModule('files')->cropperOptions, [

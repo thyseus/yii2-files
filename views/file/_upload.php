@@ -14,12 +14,17 @@ if (!isset($pluginOptions['uploadUrl'])) {
 
 $pluginOptions = ArrayHelper::merge($pluginOptions, [
     'uploadExtraData' => [
+        'target_url' => isset($target_url) ? $target_url : '',
+    ]
+]);
+
+if (isset($model)) {
+    $pluginOptions = ArrayHelper::merge($pluginOptions, [
         'model' => $model::className(),
         'attribute' => isset($_POST['attribute']) ? $_POST['attribute'] : '',
         'target_id' => method_exists($model, 'identifierAttribute') ? $model->{$model->identifierAttribute()} : $model->id,
-        'target_url' => isset($target_url) ? $target_url : '',
-    ],
-]);
+    ]);
+}
 
 echo FileInput::widget([
     'name' => 'files',
