@@ -41,7 +41,7 @@ use yii\helpers\Html;
         <?= Html::dropDownList(
             'username',
             null,
-            $users,
+            array_combine($users, $users),
             ['class' => 'form-control']); ?>
     </div>
 

@@ -25,7 +25,7 @@ class File extends ActiveRecord
      */
     public static function tableName()
     {
-        return 'files';
+        return '{{files}}';
     }
 
     public function __toString()
@@ -51,7 +51,7 @@ class File extends ActiveRecord
 
     public function downloadUrl($raw = false)
     {
-        return Url::to(['//files/file/download', 'id' => $this->id, 'raw' => $raw]);
+        return Url::to(['//files/file/download', 'id' => $this->id, 'raw' => $raw], true);
     }
 
     public function isImage()
