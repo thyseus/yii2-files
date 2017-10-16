@@ -144,13 +144,9 @@ class FileSearch extends File
             $query->andFilterWhere([
                 'like', 'shared_with', ', ' . Yii::$app->user->identity->username
             ]);
-        } else if ($this->created_by == -1) { # my own files or all files if admin
-            $query->andFilterWhere([
-                'created_by' => Yii::$app->user->can('admin') ? null : Yii::$app->user->id,
-            ]);
         } else {
             $query->andFilterWhere([
-                'created_by' => $this->created_by
+                'created_by' => Yii::$app->user->id,
             ]);
         }
 
