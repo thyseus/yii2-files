@@ -3,6 +3,7 @@
 namespace thyseus\files\controllers;
 
 use app\models\User;
+use thyseus\files\events\FileUploadEvent;
 use thyseus\files\events\ShareWithUserEvent;
 use thyseus\files\FileWebModule;
 use thyseus\files\models\File;
@@ -273,8 +274,8 @@ class FileController extends Controller
     }
 
     /**
-     * When GET request, this will render the file upload form.
-     * When POST request, this is the Endpoint to receive an uploaded file.
+     * When called via GET request, this will render the file upload form.
+     * When called via POST request, this is the endpoint to receive an uploaded file.
      * @var $public boolean Should the uploaded file be marked as public? Defaults to false.
      * @return mixed
      */
@@ -294,6 +295,7 @@ class FileController extends Controller
         $files = $_FILES['files'];
         $success = false;
         $paths = [];
+        $fileModels = [];
 
         foreach ($_FILES as $i => $file) {
             if ($file['error'] == UPLOAD_ERR_OK) {
@@ -322,6 +324,7 @@ class FileController extends Controller
                     }
 
                     $paths[] = $target;
+                    $fileModels[] = $file;
                 }
             }
         }
@@ -339,7 +342,10 @@ class FileController extends Controller
             }
         }
 
-        $this->trigger(self::EVENT_AFTER_UPLOAD);
+        $event = new FileUploadEvent;
+        $event->postData = Yii::$app->request->post();
+        $event->files = $fileModels;
+        $this->trigger(self::EVENT_AFTER_UPLOAD, $event);
 
         echo json_encode($output);
     }
@@ -409,22 +415,16 @@ class FileController extends Controller
             throw new NotFoundHttpException(Yii::t('files', 'User can not be found'));
         }
 
-        $sharedWith = $file->shared_with;
-
         if ($add == 1) {
-            $sharedWith[] = $username;
-            $sharedWith = array_unique($sharedWith);
-            $file->updateAttributes(['shared_with' => implode(', ', $sharedWith)]);
+            $file->addShareWith($username);
+
             Yii::$app->getSession()->setFlash('success',
                 Yii::t('files', 'File has been shared with {username}.', [
                 'username' => $username,
             ]));
         } else {
-            if(($key = array_search($username, $sharedWith)) !== false) {
-                unset($sharedWith[$key]);
-            }
-            $sharedWith = array_unique($sharedWith);
-            $file->updateAttributes(['shared_with' => implode(', ', $sharedWith)]);
+            $file->removeShareWith($username);
+
             Yii::$app->getSession()->setFlash('success',
                 Yii::t('files', 'File is no longer shared with {username}.', [
                     'username' => $username,

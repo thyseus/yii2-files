@@ -32,28 +32,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'date'
             ],
             [
-                'attribute' => 'display_shared_files',
-                'filter' => [
-                    0 => Yii::t('files', 'Only my own files'),
-                    1 => Yii::t('files', 'Files shared with me'),
-                ],
+                'attribute' => 'created_by',
+                'filter' => Yii::$app->user->can('admin') ? FileSearch::uploadedByFilter(-1) : FileSearch::uploadedByFilter(),
                 'value' => function ($model, $key, $index, $column) {
                     return $model->owner->username;
                 },
             ],
             'filename_user',
             [
-                'filter' => false,
+                'filter' => Yii::$app->user->can('admin') ? FileSearch::targetsGrouped(-1) : FileSearch::targetsGrouped(),
                 'format' => 'html',
                 'attribute' => 'target_id',
                 'value' => function ($data) {
                     if ($data->target) {
-                        $identifierAttribute = 'id';
+                        $caption = null;
 
-                        if (method_exists($data->target, 'identifierAttribute'))
+                        if (method_exists($data->target, '__toString')) {
+                            $caption = $data->target->__toString();
+                        } else if (method_exists($data->target, 'identifierAttribute')) {
+                            $identifierAttribute = 'id';
                             $identifierAttribute = $data->target->identifierAttribute();
+                            $caption = $data->target->$identifierAttribute;
+                        }
 
-                        return Html::a($data->target->$identifierAttribute, $data->target_url);
+                        return Html::a($caption, $data->target_url);
                     }
                 },
             ],

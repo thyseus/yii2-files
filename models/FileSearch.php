@@ -5,6 +5,7 @@ namespace thyseus\files\models;
 use thyseus\files\models\File;
 use Yii;
 use yii\data\ActiveDataProvider;
+use app\models\User;
 
 /**
  * FilsSearch represents the model behind the search form about `app\models\File`.
@@ -12,9 +13,44 @@ use yii\data\ActiveDataProvider;
 class FileSearch extends File
 {
     /**
-     * @var display_shared_files when set to true, only files that are shared with me are found, not my own files
+     * @return array a grouped list of targets of all files that the user has been access to
+     * Provide -1 to get ALL targets in the system. Useful for the administrator view.
      */
-    public $display_shared_files;
+    public static function targetsGrouped($user_id = null)
+    {
+        if (!$user_id) {
+            $user_id = Yii::$app->user->id;
+        }
+
+        $targets = [];
+
+        foreach (File::find()
+                     ->select(['target_id', 'model'])
+                     ->where($user_id == -1 ? [] : ['created_by' => $user_id])
+                     ->groupBy('target_id')
+                     ->all() as $file) {
+            if ($file->model && $target = $file->target) {
+                $identifier = null;
+                $caption = '';
+                $identifierAttribute = 'id';
+                $identifier = $target->id;
+
+                if (method_exists($target, 'identifierAttribute')) {
+                    $identifierAttribute = $target->identifierAttribute();
+                    $caption = $target->$identifierAttribute;
+                    $identifier = $target->$identifierAttribute;
+                }
+
+                if (method_exists($target, '__toString')) {
+                    $caption = $target->__toString();
+                }
+
+                $targets[$identifier] = $caption;
+            }
+        }
+
+        return $targets;
+    }
 
     /**
      * @param null $user_id user id of the user.
@@ -41,16 +77,38 @@ class FileSearch extends File
         return $mimetypes;
     }
 
-    /**
-     * add 'display_shared_files' as safe
-     * @return array the added rules
-     */
-    public function rules()
-    {
-        $rules = parent::rules();
-        $rules[] = ['display_shared_files', 'safe'];
 
-        return $rules;
+    /**
+     * @return array a grouped list of uploaders of all files that the user has been access to
+     * Provide -1 to get ALL targets in the system. Useful for the administrator view.
+     *
+     * -1 for my own files and -2 for files that have been shared with me are automatically appended
+     * to the filter.
+     * @see method search() in this File.
+     */
+    public static function uploadedByFilter($user_id = null): array
+    {
+        $uploadedBy = [
+            -1 => Yii::t('files', 'Only my own files'),
+            -2 => Yii::t('files', 'Files shared with me'),
+        ];
+
+        if (!$user_id) {
+            $user_id = Yii::$app->user->id;
+        }
+
+        foreach (File::find()
+                     ->select('created_by')
+                     ->where($user_id == -1 ? [] : ['created_by' => $user_id])
+                     ->groupBy('created_by')
+                     ->all() as $file) {
+            if ($user = User::findOne($file->created_by)) {
+                $uploadedBy[$file->created_by] = $user->username;
+            }
+
+        }
+
+        return $uploadedBy;
     }
 
     /**
@@ -79,15 +137,20 @@ class FileSearch extends File
             'public' => $this->public,
             'position' => $this->position,
             'status' => $this->status,
+            'target_id' => $this->target_id,
         ]);
 
-        if ($this->display_shared_files) {
+        if ($this->created_by == -2) { # files shared with me
             $query->andFilterWhere([
                 'like', 'shared_with', ', ' . Yii::$app->user->identity->username
             ]);
-        } else {
+        } else if ($this->created_by == -1) { # my own files or all files if admin
             $query->andFilterWhere([
                 'created_by' => Yii::$app->user->can('admin') ? null : Yii::$app->user->id,
+            ]);
+        } else {
+            $query->andFilterWhere([
+                'created_by' => $this->created_by
             ]);
         }
 

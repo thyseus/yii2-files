@@ -30,14 +30,20 @@ $owner = $model->created_by == Yii::$app->user->id;
                         'label' => 'Target',
                         'visible' => $model->target !== null,
                         'format' => 'html',
-                        'value' => function ($data) {
-                            if ($data->target) {
-                                $identifierAttribute = 'id';
+                        'value' => function ($model) {
+                            if ($model->target) {
+                                $caption = '';
 
-                                if (method_exists($data->target, 'identifierAttribute'))
-                                    $identifierAttribute = $data->target->identifierAttribute();
+                                if (method_exists($model->target, 'identifierAttribute')) {
+                                    $identifierAttribute = $model->target->identifierAttribute();
+                                    $caption = $model->target->$identifierAttribute;
+                                }
 
-                                return Html::a($data->target->$identifierAttribute, $data->target_url);
+                                if (method_exists($model, '__toString')) {
+                                    $caption = $model->target->__toString();
+                                }
+
+                                return Html::a($caption, $model->target_url);
                             }
                         }
                     ],

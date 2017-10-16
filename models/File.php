@@ -2,6 +2,8 @@
 
 namespace thyseus\files\models;
 
+use app\models\User;
+use thyseus\files\events\ShareWithUserEvent;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -20,6 +22,9 @@ use yii\helpers\Url;
  */
 class File extends ActiveRecord
 {
+    const EVENT_BEFORE_SHARE_WITH_USER = 'before_share_with_user';
+    const EVENT_AFTER_SHARE_WITH_USER = 'after_share_with_user';
+
     /**
      * @inheritdoc
      */
@@ -117,7 +122,7 @@ class File extends ActiveRecord
             [['position'], 'default', 'value' => 1000],
             [['download_count'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 0],
-            [['public', 'position', 'status', 'download_count'], 'integer'],
+            [['public', 'position', 'status', 'download_count', 'created_by'], 'integer'],
             [['filename_path', 'filename_user', 'model', 'target_id', 'target_url', 'mimetype'], 'string'],
         ];
     }
@@ -160,6 +165,52 @@ class File extends ActiveRecord
         parent::afterDelete();
     }
 
+    public function addShareWith($username) {
+        $recipient = User::find()->where(['username' => $username])->one();
+
+        if (!$recipient) {
+            throw new NotFoundHttpException(Yii::t('files', 'User can not be found'));
+        }
+
+        $sharedWith = $this->shared_with;
+        $sharedWith[] = $username;
+        $sharedWith = array_unique($sharedWith);
+
+        $this->updateAttributes(['shared_with' => implode(', ', $sharedWith)]);
+
+        $event = new ShareWithUserEvent;
+        $event->sharedFrom = Yii::$app->user->identity;
+        $event->sharedWith = $recipient;
+        $event->sharedFile = $this;
+        $event->add = 1;
+        $this->trigger(self::EVENT_AFTER_SHARE_WITH_USER, $event);
+    }
+
+    public function removeShareWith($username) {
+        $recipient = User::find()->where(['username' => $username])->one();
+
+        if (!$recipient) {
+            throw new NotFoundHttpException(Yii::t('files', 'User can not be found'));
+        }
+
+        $sharedWith = $this->shared_with;
+
+        if (($key = array_search($username, $sharedWith)) !== false) {
+            unset($sharedWith[$key]);
+        }
+
+        $sharedWith = array_unique($sharedWith);
+
+        $this->updateAttributes(['shared_with' => implode(', ', $sharedWith)]);
+
+        $event = new ShareWithUserEvent;
+        $event->sharedFrom = Yii::$app->user->identity;
+        $event->sharedWith = $recipient;
+        $event->sharedFile = $this;
+        $event->add = 0;
+        $this->trigger(self::EVENT_AFTER_SHARE_WITH_USER, $event);
+    }
+
     /**
      * Deserialize shared_with column
      */
@@ -193,8 +244,9 @@ class File extends ActiveRecord
 
         $identifier_attribute = 'id';
 
-        if (method_exists($target, 'identifierAttribute'))
+        if (method_exists($target, 'identifierAttribute')) {
             $identifier_attribute = $target->identifierAttribute();
+        }
 
         return $this->hasOne($targetClass::className(), [$identifier_attribute => 'target_id']);
     }
