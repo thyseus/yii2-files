@@ -1,7 +1,10 @@
 <?php
 
+use thyseus\files\models\File;
 use yii\helpers\Html;
+use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\Sitecontent */
@@ -78,7 +81,12 @@ $owner = $model->created_by == Yii::$app->user->id;
                         'format' => 'html',
                         'attribute' => 'target_url',
                         'value' => $model->target_url ? Html::a($model->target_url, $model->target_url) : null,
-                    ]
+                    ],
+                    [
+                        'attribute' => 'tags',
+                        'value' => $model->getTagsFormatted(),
+                        'visible' => Yii::$app->getModule('files')->possibleTags,
+                    ],
                 ]
             ]);
             ?>
@@ -101,30 +109,55 @@ $owner = $model->created_by == Yii::$app->user->id;
             <br>
 
             <?php if ($owner) { ?>
-            <?php if ($model->public) { ?>
-                <div class="alert alert-warning"><p> <?= Yii::t('files', 'File is public'); ?>. </p></div>
+                <?php if ($model->public) { ?>
+                    <div class="alert alert-warning"><p> <?= Yii::t('files', 'File is public'); ?>. </p></div>
 
-                <br>
+                    <br>
 
-                <?= Html::a(Yii::t('files', 'Make protected'), ['//files/file/protect', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
+                    <?= Html::a(Yii::t('files', 'Make protected'), ['//files/file/protect', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
 
-            <?php } else { ?>
-                <div class="alert alert-warning"><p><?= Yii::t('files', 'File is protected'); ?>.</p></div>
+                <?php } else { ?>
+                    <div class="alert alert-warning"><p><?= Yii::t('files', 'File is protected'); ?>.</p></div>
 
-                <?= $this->render('_shared_with', ['model' => $model, 'users' => $users]); ?>
+                    <?= $this->render('_shared_with', ['model' => $model, 'users' => $users]); ?>
 
-                <br>
+                    <br>
 
-                <?= Html::a(Yii::t('files', 'Make public'), ['//files/file/publish', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
+                    <?= Html::a(Yii::t('files', 'Make public'), ['//files/file/publish', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
 
-            <?php } ?>
+                <?php } ?>
 
-            <hr>
+                <hr>
 
-            <?= Html::a(Yii::t('files', 'Remove file'), ['/files/file/delete', 'id' => $model->id],
-                ['class' => 'btn btn-danger', 'data-confirm' => 'Are you sure?']);
+                <?php if (Yii::$app->getModule('files')->possibleTags) { ?>
 
-            ?>
+                    <?php $form = ActiveForm::begin(['id' => 'file-tags-form']); ?>
+
+                    <?= $form->field($model, 'tags')->widget(Select2::classname(), [
+                        'data' => File::possibleTagsTranslated(),
+                        'options' => [
+                            'placeholder' => Yii::t('files', 'Select tags'),
+                        ],
+                        'pluginOptions' => [
+                            'multiple' => true,
+                            'disabled' => !$owner,
+                            'allowClear' => true,
+                        ],
+                    ]);
+                    ?>
+
+                    <?= Html::submitButton(Yii::t('files', 'Save tags'), ['class' => 'btn btn-primary']); ?>
+
+                    <?php ActiveForm::end(); ?>
+
+                <?php } ?>
+
+                <hr>
+
+                <?= Html::a(Yii::t('files', 'Remove file'), ['/files/file/delete', 'id' => $model->id],
+                    ['class' => 'btn btn-danger', 'data-confirm' => 'Are you sure?']);
+
+                ?>
 
             <?php } ?>
         </div>

@@ -58,4 +58,7 @@ return [
     'Uploaded by' => 'Hochgeladen von',
     'Only my own files' => 'Nur meine Eigenen',
     'Files shared with me' => 'Mit mir geteilt',
+    'Select tags' => 'Tags auswählen',
+    'Save tags' => 'Tags speichern',
+    'Tags have been updated' => 'Tags wurden aktualisiert',
 ];

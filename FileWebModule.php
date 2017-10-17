@@ -70,6 +70,17 @@ class FileWebModule extends \yii\base\Module
      */
     public $shareableUsersCallback = null;
 
+    /**
+     * @var array fill this array to let users tag their file with some of these options. For example:
+     *
+     * 'possibleTags' => [
+     *      'logo' => 'Logo',
+     *      'screenshot' => 'Screenshot',
+     * ],
+     * The key is stored in the database, the value is translated via Yii::t('app', as caption for the Tag.
+     */
+    public $possibleTags = [];
+
     /** @var array The rules to be used in URL management. */
     public $urlRules = [
         'files/update/<id>' => 'files/files/update',

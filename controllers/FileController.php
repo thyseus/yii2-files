@@ -113,7 +113,6 @@ class FileController extends Controller
         }
     }
 
-
     /**
      * Changes the position of a file by direction (up or down)
      * @return mixed
@@ -364,6 +363,14 @@ class FileController extends Controller
             throw new ForbiddenHttpException;
         }
 
+        if (Yii::$app->request->post()) {
+            if ($file->load(Yii::$app->request->post()) && $file->save()) {
+                Yii::$app->getSession()->setFlash('success',
+                    Yii::t('files', 'Tags have been updated'));
+                $file->refresh();
+            }
+        }
+
         Yii::$app->user->setReturnUrl(['//files/file/view', 'id' => $id]);
 
         return $this->render('view', [
@@ -380,7 +387,10 @@ class FileController extends Controller
         if (is_callable(Yii::$app->getModule('files')->shareableUsersCallback)) {
             return call_user_func(Yii::$app->getModule('files')->shareableUsersCallback);
         } else {
-            return ArrayHelper::map(\app\Models\User::find()->all(), 'username', 'username');
+            return ArrayHelper::map(
+                \app\Models\User::find()
+                    ->where(['!=', 'id', Yii::$app->user->id])
+                    ->all(), 'username', 'username');
         }
     }
 

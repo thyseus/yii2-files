@@ -40,7 +40,7 @@ class File extends ActiveRecord
 
     /**
      * Returns an link that downloads the file.
-     * @param bool $raw 
+     * @param bool $raw
      * @param string $caption optional: the caption for the link.
      * @return string
      */
@@ -68,8 +68,9 @@ class File extends ActiveRecord
      * Crop the image to the dimensions given in FileWebModule->crop_target_{width/height} using Imagine.
      * Thanks to http://www.yiiframework.com/wiki/859/how-to-resize-an-image-proportionally/
      */
-    public function crop() {
-        $imagine  = \yii\imagine\Image::getImagine();
+    public function crop()
+    {
+        $imagine = \yii\imagine\Image::getImagine();
 
         $width = Yii::$app->getModule('files')->crop_target_width;
         $height = Yii::$app->getModule('files')->crop_target_height;
@@ -87,11 +88,11 @@ class File extends ActiveRecord
         $startX = $startY = 0;
 
         if ($widthR < $width) {
-            $startX = ( $width - $widthR ) / 2;
+            $startX = ($width - $widthR) / 2;
         }
 
         if ($heightR < $height) {
-            $startY = ( $height - $heightR ) / 2;
+            $startY = ($height - $heightR) / 2;
         }
 
         $preserve
@@ -122,6 +123,8 @@ class File extends ActiveRecord
             [['position'], 'default', 'value' => 1000],
             [['download_count'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 0],
+
+            [['tags'], 'safe'],
             [['public', 'position', 'status', 'download_count', 'created_by'], 'integer'],
             [['filename_path', 'filename_user', 'model', 'target_id', 'target_url', 'mimetype'], 'string'],
         ];
@@ -165,7 +168,8 @@ class File extends ActiveRecord
         parent::afterDelete();
     }
 
-    public function addShareWith($username) {
+    public function addShareWith($username)
+    {
         $recipient = User::find()->where(['username' => $username])->one();
 
         if (!$recipient) {
@@ -186,7 +190,8 @@ class File extends ActiveRecord
         $this->trigger(self::EVENT_AFTER_SHARE_WITH_USER, $event);
     }
 
-    public function removeShareWith($username) {
+    public function removeShareWith($username)
+    {
         $recipient = User::find()->where(['username' => $username])->one();
 
         if (!$recipient) {
@@ -217,7 +222,54 @@ class File extends ActiveRecord
     public function afterFind()
     {
         $this->shared_with = explode(', ', $this->shared_with);
-       return parent::afterFind();
+        $this->tags = explode(', ', $this->tags);
+        return parent::afterFind();
+    }
+
+    public function beforeValidate()
+    {
+        $this->handleSerializableFields();
+        return parent::beforeValidate();
+    }
+
+    public function getTagsFormatted()
+    {
+        if (!is_array($this->tags)) {
+            $this->tags = explode(', ', $this->tags);
+        }
+
+        $output = '';
+        foreach ($this->tags as $tag) {
+            $output .= Yii::t('app', Yii::$app->getModule('files')->possibleTags[$tag] ?? $tag) . ', ';
+        }
+
+        if ($output) {
+            $output = substr($output, 0, -2);
+        }
+
+        return $output;
+    }
+
+    public function handleSerializableFields()
+    {
+        if (is_array($this->shared_with)) {
+            $this->shared_with = implode(', ', $this->shared_with);
+        }
+
+        if (is_array($this->tags)) {
+            $this->tags = implode(', ', $this->tags);
+        }
+
+    }
+
+    /**
+     * serialize shared_with column
+     */
+    public function beforeDelete()
+    {
+        $this->handleSerializableFields();
+
+        return parent::beforeDelete();
     }
 
     /**
@@ -226,6 +278,20 @@ class File extends ActiveRecord
     public function getOwner()
     {
         return $this->hasOne(Yii::$app->getModule('files')->userModelClass, ['id' => 'created_by']);
+    }
+
+    /**
+     * Take all tags that are defined in Yii::$app->getModule('files')->possibleTags and translate the values.
+     * @return array the translated tags
+     */
+    public static function possibleTagsTranslated()
+    {
+        $tags = [];
+        foreach (Yii::$app->getModule('files')->possibleTags as $key => $value) {
+            $tags[$key] = Yii::t('app', $value);
+        }
+
+        return $tags;
     }
 
     /**
