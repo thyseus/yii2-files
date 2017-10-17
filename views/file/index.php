@@ -27,6 +27,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             [
+                'attribute' => 'tags',
+                'visible' => Yii::$app->getModule('files')->possibleTags,
+                'filter' => Yii::$app->getModule('files')->possibleTags,
+                'value' => function($model) {
+                    return $model->getTagsFormatted();
+                },
+            ],
+            [
                 'attribute' => 'created_at',
                 'filter' => false,
                 'format' => 'date'

@@ -153,6 +153,7 @@ class FileSearch extends File
         $query->andFilterWhere(['like', 'filename_user', $this->filename_user]);
         $query->andFilterWhere(['like', 'filename_path', $this->filename_path]);
         $query->andFilterWhere(['like', 'mimetype', $this->mimetype]);
+        $query->andFilterWhere(['like', 'tags', $this->tags]);
 
         return $dataProvider;
     }
