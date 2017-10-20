@@ -16,7 +16,7 @@ use yii\helpers\Html;
                 <tr>
                     <td> <?= $username; ?>
                     <td> <?= Html::a(Yii::t('files', 'Remove share'),
-                            ['share-with-user', 'file_id' => $model->id, 'username' => $username, 'add' => 0]
+                            ['share-with-user', 'file_id' => $model->slug, 'username' => $username, 'add' => 0]
                         ); ?> </td>
                 </tr>
             <?php } ?>
@@ -31,7 +31,7 @@ use yii\helpers\Html;
 
 
 <?php ActiveForm::begin(['action' =>
-    ['share-with-user', 'file_id' => $model->id, 'add' => 1]
+    ['share-with-user', 'file_id' => $model->slug, 'add' => 1]
 ]); ?>
 
 <?= Yii::t('files', 'Share file with user'); ?>:

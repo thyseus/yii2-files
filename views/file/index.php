@@ -133,18 +133,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     if ($model->isImage())
                         $actions .= '<nobr>' . Html::a(
                                 '<span class="glyphicon glyphicon-scissors" aria-hidden="true"></span> ' . Yii::t('files', 'Crop Image'),
-                                ['//files/file/crop', 'id' => $model->id]) . '</nobr><br>';
+                                ['//files/file/crop', 'id' => $model->slug]) . '</nobr><br>';
 
                     $actions .= $model->downloadLink() . '<br>';
                     $actions .= '<nobr>' . Html::a(
                             '<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> ' . Yii::t('files', 'Properties'),
-                            ['//files/file/view', 'id' => $model->id], [
+                            ['//files/file/view', 'id' => $model->slug], [
                             'data-pjax' => '0',
                         ]) . '</nobr><br>';
                     if ($owner) {
                         $actions .= '<nobr>' . Html::a(
                                 '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> ' . Yii::t('files', 'Delete File'),
-                                ['//files/file/delete', 'id' => $model->id], [
+                                ['//files/file/delete', 'id' => $model->slug], [
                                 'data-pjax' => '0',
                                 'data-method' => 'POST',
                                 'data-confirm' => Yii::t('files', 'Are you Sure?'),

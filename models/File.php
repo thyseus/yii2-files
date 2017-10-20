@@ -6,6 +6,7 @@ use app\models\User;
 use thyseus\files\events\ShareWithUserEvent;
 use Yii;
 use yii\behaviors\BlameableBehavior;
+use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Html;
@@ -56,7 +57,7 @@ class File extends ActiveRecord
 
     public function downloadUrl($raw = false)
     {
-        return Url::to(['//files/file/download', 'id' => $this->id, 'raw' => $raw], true);
+        return Url::to(['//files/file/download', 'id' => $this->slug, 'raw' => $raw], true);
     }
 
     public function isImage()
@@ -109,7 +110,12 @@ class File extends ActiveRecord
             ],
             [
                 'class' => BlameableBehavior::className(),
-            ]
+            ],
+            [
+                'class' => SluggableBehavior::className(),
+                'attribute' => 'filename_user',
+                'ensureUnique' => true,
+            ],
         ];
     }
 

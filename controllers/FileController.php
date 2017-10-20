@@ -98,15 +98,17 @@ class FileController extends Controller
     }
 
     /**
-     * Finds the File model based on its primary key value.
+     * Finds the File model based on its slug or its id.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param string $id
+     * @param string $id (slug or auto increment value)
      * @return File the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = File::findOne(['id' => $id])) !== null) {
+        if (($model = File::findOne(['slug' => $id])) !== null) {
+            return $model;
+        } else if (($model = File::findOne(['id' => $id])) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException(Yii::t('files', 'The requested file does not exist.'));
@@ -224,7 +226,7 @@ class FileController extends Controller
      * Increments the download_count of the requested file by one, if valid.
      * @return mixed
      */
-    public function actionDownload(int $id, bool $raw = false)
+    public function actionDownload(string $id, bool $raw = false)
     {
         $model = $this->findModel($id);
 
@@ -403,7 +405,7 @@ class FileController extends Controller
      * @param $add shall the user be added (1) or removed (!= 1) from the shared list
      * @throws ForbiddenHttpException
      */
-    public function actionShareWithUser(int $file_id, bool $add, string $username = null)
+    public function actionShareWithUser(string $file_id, bool $add, string $username = null)
     {
         $this->trigger(self::EVENT_BEFORE_SHARE_WITH_USER);
 
