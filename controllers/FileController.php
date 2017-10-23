@@ -29,8 +29,8 @@ class FileController extends Controller
     const EVENT_BEFORE_UPLOAD = 'before_upload';
     const EVENT_AFTER_UPLOAD = 'after_upload';
 
-    const EVENT_BEFORE_DELETE = 'before_upload';
-    const EVENT_AFTER_DELETE = 'after_upload';
+    const EVENT_BEFORE_DELETE = 'before_delete';
+    const EVENT_AFTER_DELETE = 'after_delete';
 
     const EVENT_BEFORE_PUBLISH = 'before_publish';
     const EVENT_AFTER_PUBLISH = 'after_publish';
