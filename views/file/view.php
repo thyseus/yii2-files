@@ -95,7 +95,9 @@ $owner = $model->created_by == Yii::$app->user->id;
             <?php if ($model->isImage()): ?>
                 <img src="<?= $model->downloadUrl(); ?>" alt="image"/>
                 <br>
-                <?= Html::a(Yii::t('files', 'Crop Image'), ['crop', 'id' => $model->id]); ?>
+                <?php if ($owner) { ?>
+                    <?= Html::a(Yii::t('files', 'Crop Image'), ['crop', 'id' => $model->id]); ?>
+                <?php } ?>
             <?php endif ?>
 
             <br>

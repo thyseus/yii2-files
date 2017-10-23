@@ -278,9 +278,10 @@ class FileController extends Controller
      * When called via GET request, this will render the file upload form.
      * When called via POST request, this is the endpoint to receive an uploaded file.
      * @var $public boolean Should the uploaded file be marked as public? Defaults to false.
+     * @var $tags string Comma separated list of tags that the uploaded file should be tagged with.
      * @return mixed
      */
-    public function actionUpload($public = false)
+    public function actionUpload($public = false, $tags = '')
     {
         if (Yii::$app->request->isGet) {
             return $this->render('upload');
@@ -315,6 +316,7 @@ class FileController extends Controller
                             'target_id' => isset($_POST['target_id']) ? $_POST['target_id'] : '',
                             'target_url' => isset($_POST['target_url']) ? $_POST['target_url'] : '',
                             'public' => ((isset($_POST['public']) && $_POST['public']) || $public) ? 1 : 0,
+                            'tags' => $tags,
                         ],
                     ]);
 
