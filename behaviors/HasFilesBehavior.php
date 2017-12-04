@@ -54,7 +54,7 @@ class HasFilesBehavior extends Behavior
     /**
      * Attaches an method 'filesFromUser(<id>)' to the owner model that retrieves all files that are owned by this user.
      *
-     * @return yii\db\ActiveQuery
+     * @return array list of found files
      */
     public function filesFromUser($id)
     {
@@ -63,6 +63,29 @@ class HasFilesBehavior extends Behavior
         if (method_exists($this->owner, 'identifierAttribute'))
             $identifierAttribute = $this->owner->identifierAttribute();
 
-        return $this->owner->hasMany(File::className(), ['target_id' => $identifierAttribute])->andWhere(['files.created_by' => $id])->orderBy('position ASC')->all();
+        return $this->owner
+            ->hasMany(File::className(), ['target_id' => $identifierAttribute])
+            ->andWhere(['files.created_by' => $id])
+            ->orderBy('position ASC')
+            ->all();
+    }
+
+    /**
+     * Attaches an method 'filesWithTag(<tag>)' to the owner model that retrieves all files that are tagged with the given tag.
+     *
+     * @return array list of found files
+     */
+    public function filesWithTag($tag)
+    {
+        $identifierAttribute = 'id';
+
+        if (method_exists($this->owner, 'identifierAttribute'))
+            $identifierAttribute = $this->owner->identifierAttribute();
+
+        return $this->owner
+            ->hasMany(File::className(), ['target_id' => $identifierAttribute])
+            ->andWhere(['like', 'files.tags' , $tag])
+            ->orderBy('position ASC')
+            ->all();
     }
 }
