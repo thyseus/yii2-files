@@ -68,11 +68,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             [
-                'filter' => Yii::$app->user->can('admin') ? FileSearch::mimeTypesGrouped(-1) : FileSearch::mimeTypesGrouped(),
+                'filter' => FileSearch::mimeTypesGrouped(Yii::$app->user->can('admin') ? -1 : 0),
                 'attribute' => 'mimetype',
             ],
             [
-                'filter' => [0 => Yii::t('files', 'No'), 1 => Yii::t('files', 'Yes')],
+                'filter' => [
+                    0 => Yii::t('files', 'No'),
+                    1 => Yii::t('files', 'Yes'),
+                ],
                 'attribute' => 'public',
                 'format' => 'html',
                 'value' => function ($model) {
@@ -130,10 +133,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     $owner = $model->created_by == Yii::$app->user->id;
                     $actions = '';
 
-                    if ($model->isImage())
+                    // The current implementation of the cropper does only work on Google Chrome (Webkit) based browsers
+                    if ($model->isImage() && stripos($_SERVER['HTTP_USER_AGENT'], 'chrome') !== FALSE) {
                         $actions .= '<nobr>' . Html::a(
                                 '<span class="glyphicon glyphicon-scissors" aria-hidden="true"></span> ' . Yii::t('files', 'Crop Image'),
                                 ['//files/file/crop', 'id' => $model->slug]) . '</nobr><br>';
+                    }
 
                     $actions .= $model->downloadLink() . '<br>';
                     $actions .= '<nobr>' . Html::a(
