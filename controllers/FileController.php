@@ -12,10 +12,12 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\validators\FileValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 
 /**
  * FileController implements all actions for the yii2-files module.
@@ -304,6 +306,18 @@ class FileController extends Controller
                 $ext = explode('.', basename($file['name']));
                 $target = Yii::$app->getModule('files')->uploadPath . '/' . md5(uniqid()) . "." . array_pop($ext);
 
+                $allowed_mime_types = $_POST['allowed_mime_types'] ?? null;
+
+                // Skip the file if the mime type is not allowed
+                if ($allowed_mime_types) {
+                    if (!is_array($allowed_mime_types)) {
+                        $allowed_mime_types = [$allowed_mime_types];
+                    }
+                    if (!File::validateMimeType($file['tmp_name'], $allowed_mime_types)) {
+                        continue;
+                    }
+                }
+
                 if (move_uploaded_file($file['tmp_name'], $target)) {
                     $file = Yii::createObject([
                         'class' => File::className(),
@@ -337,8 +351,9 @@ class FileController extends Controller
         } else {
             $output = ['error' => Yii::t('files', 'Error while uploading files. Please contact the system administrator.')];
 
-            if (YII_DEBUG)
-                $output['error'] .= error_get_last() . (isset($file) ? json_encode($file->getErrors()) : '');
+            if (YII_DEBUG) {
+                $output['error'] .= error_get_last() . $file instanceof File ? $file->getErrors() : '';
+            }
 
             foreach ($paths as $file) {
                 unlink($file);

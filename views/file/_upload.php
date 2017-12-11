@@ -25,6 +25,10 @@ if (isset($model)) {
             'target_id' => $target_id,
         ]
     ]);
+
+    if (isset($options['accept'])) {
+        $pluginOptions['uploadExtraData']['allowed_mime_types'] = $options['accept'];
+    }
 }
 
 echo FileInput::widget([

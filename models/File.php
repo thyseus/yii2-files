@@ -9,6 +9,7 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\SluggableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\FileHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -321,5 +322,31 @@ class File extends ActiveRecord
         }
 
         return $this->hasOne($targetClass::className(), [$identifier_attribute => 'target_id']);
+    }
+
+    /**
+     * Checks the mimeType of the $file against the list in the [[mimeTypes]] property.
+     * borrowed from: https://github.com/yiisoft/yii2/blob/master/framework/validators/FileValidator.php#L479
+     *
+     * @param string $tempName
+     * @return bool whether the $file mimeType is allowed
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function validateMimeType($tempName, $mimeTypes)
+    {
+        $fileMimeType = FileHelper::getMimeType($tempName);
+
+        foreach ($mimeTypes as $mimeType) {
+            if ($mimeType === $fileMimeType) {
+                return true;
+            }
+
+            $regexp =  '/^' . str_replace('\*', '.*', preg_quote($mimeType, '/')) . '$/';
+
+            if (strpos($mimeType, '*') !== false && preg_match($regexp, $fileMimeType)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
