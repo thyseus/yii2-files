@@ -39,6 +39,22 @@ Since 0.3.0 users can share his files with users he chooses to. In order to make
 work, you need to provide an app\models\User Active Record model with at least the attributes 
 'id' and 'username'.
 
+## Important Update Notice:
+
+Since 0.4.0 (2017-12-18) yii2-files does automatically save a md5 checksum of each file that is being uploaded.
+This checksum is being checked when downloading the file.
+Ensure that your migrations have been executed so that the column 'checksum' exists.
+In order to update all already uploaded files with the correct checksum, please run the following command in your
+yii2-shell:
+
+```php
+foreach(thyseus\files\models\File::find()->all() as $file) {
+    if (!$file->checksum) {
+        $file->updateAttributes(['checksum' => md5(file_get_contents($file->filename_path))]);
+    }
+}
+```
+
 ## Configuration
 
 Add following lines to your main configuration file:

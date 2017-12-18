@@ -81,6 +81,12 @@ class FileWebModule extends \yii\base\Module
      */
     public $possibleTags = [];
 
+    /**
+     * @var bool Set to true to skip the checksum integrity check for downloading files. Please note that this
+     * does severly impact the security because files can be changed after uploaded and can get malicious content.
+     */
+    public $skipChecksumIntegrity = false;
+
     /** @var array The rules to be used in URL management. */
     public $urlRules = [
         'files/update/<id>' => 'files/files/update',

@@ -28,6 +28,11 @@ class File extends ActiveRecord
     const EVENT_AFTER_SHARE_WITH_USER = 'after_share_with_user';
 
     /**
+     * @var $content in order to generate the md5 sum of the file the content is temporarily saved here
+     */
+    public $content;
+
+    /**
      * @inheritdoc
      */
     public static function tableName()
@@ -131,9 +136,11 @@ class File extends ActiveRecord
             [['download_count'], 'default', 'value' => 0],
             [['status'], 'default', 'value' => 0],
 
-            [['tags'], 'safe'],
+            [['tags', 'content'], 'safe'],
             [['public', 'position', 'status', 'download_count', 'created_by'], 'integer'],
             [['filename_path', 'filename_user', 'model', 'target_id', 'target_url', 'mimetype'], 'string'],
+            [['checksum'], 'required'],
+            [['checksum'], 'string', 'max' => 32],
         ];
     }
 
@@ -151,6 +158,7 @@ class File extends ActiveRecord
             'public' => Yii::t('files', 'public'),
             'model' => Yii::t('files', 'model'),
             'target_id' => Yii::t('files', 'Target'),
+            'target_url' => Yii::t('files', 'Target Url'),
             'filename_path' => Yii::t('files', 'filename_path'),
             'filename_user' => Yii::t('files', 'filename_user'),
             'mimetype' => Yii::t('files', 'File format'),
@@ -159,6 +167,7 @@ class File extends ActiveRecord
             'tags' => Yii::t('files', 'Tags'),
             'shared_with' => Yii::t('files', 'Shared with'),
             'display_shared_files' => Yii::t('files', 'Uploaded by'),
+            'checksum' => Yii::t('files', 'Checksum'),
         ];
     }
 
@@ -236,6 +245,7 @@ class File extends ActiveRecord
     public function beforeValidate()
     {
         $this->handleSerializableFields();
+        $this->createChecksum();
         return parent::beforeValidate();
     }
 
@@ -257,7 +267,25 @@ class File extends ActiveRecord
         return $output;
     }
 
-    public function handleSerializableFields()
+
+    /**
+     * @return bool if the file is valid; always true if the check is being skipped
+     */
+    public function proofChecksum()
+    {
+        if (Yii::$app->getModule('files')->skipChecksumIntegrity) {
+            return true;
+        }
+
+        return $this->checksum == md5(file_get_contents($this->filename_path));
+    }
+
+    protected function createChecksum()
+    {
+        $this->checksum = md5($this->content);
+    }
+
+    protected function handleSerializableFields()
     {
         if (is_array($this->shared_with)) {
             $this->shared_with = implode(', ', $this->shared_with);

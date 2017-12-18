@@ -9,6 +9,7 @@ use thyseus\files\FileWebModule;
 use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use Yii;
+use yii\base\InvalidParamException;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
@@ -236,6 +237,12 @@ class FileController extends Controller
             throw new ForbiddenHttpException;
         }
 
+        if (!$model->proofChecksum()) {
+            throw new NotFoundHttpException(Yii::t('files',
+                'Error: failed checksum check. The file or checksum has been changed after upload. File integrity can note be ensured. Download aborted. Please contact the System Administrator.'));
+            return false;
+        }
+
         header("Content-Type: $model->mimetype");
 
         if (!file_exists($model->filename_path)) {
@@ -318,10 +325,13 @@ class FileController extends Controller
                     }
                 }
 
+                $content = file_get_contents($file['tmp_name']);
+
                 if (move_uploaded_file($file['tmp_name'], $target)) {
                     $file = Yii::createObject([
                         'class' => File::className(),
                         'attributes' => [
+                            'content' => $content,
                             'filename_user' => $file['name'],
                             'created_by' => Yii::$app->user->id,
                             'filename_path' => $target,
@@ -352,7 +362,7 @@ class FileController extends Controller
             $output = ['error' => Yii::t('files', 'Error while uploading files. Please contact the system administrator.')];
 
             if (YII_DEBUG) {
-                $output['error'] .= error_get_last() . $file instanceof File ? $file->getErrors() : '';
+                $output['error'] .= error_get_last() . $file instanceof File ? $file->getErrors() : json_encode($file);
             }
 
             foreach ($paths as $file) {

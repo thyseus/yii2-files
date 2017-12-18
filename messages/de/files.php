@@ -61,4 +61,6 @@ return [
     'Select tags' => 'Tags auswählen',
     'Save tags' => 'Tags speichern',
     'Tags have been updated' => 'Tags wurden aktualisiert',
+    'Target Url' => 'Ziel-URL',
+    'Checksum' => 'Prüfsumme',
 ];

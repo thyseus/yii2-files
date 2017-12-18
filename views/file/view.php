@@ -87,6 +87,9 @@ $owner = $model->created_by == Yii::$app->user->id;
                         'value' => $model->getTagsFormatted(),
                         'visible' => Yii::$app->getModule('files')->possibleTags,
                     ],
+                    [
+                        'attribute' => 'checksum',
+                    ]
                 ]
             ]);
             ?>
