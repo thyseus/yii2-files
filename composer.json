@@ -3,7 +3,7 @@
     "description": "General file upload management for Yii2",
     "keywords": ["yii2", "yii2-files"],
     "type": "yii2-extension",
-    "license": "GPLv3",
+    "license": "GPL-2.0-only",
     "version": "0.1.0",
     "support": {
         "issues": "https://github.com/thyseus/yii2-files/issues?state=open",
