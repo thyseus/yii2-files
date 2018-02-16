@@ -16,15 +16,17 @@ $this->params['breadcrumbs'][] = $this->title;
 $owner = $model->created_by == Yii::$app->user->id;
 ?>
 <div class="file-view">
-
     <div class="row">
-        <div class="row-lg-12">
-            <h1><?= Html::encode($this->title) ?></h1>
+        <div class="col-md-12">
+            <?= Html::a(Yii::t('files', 'Back to file overview'), ['index']); ?>
+            <span class="pull-right"> <?= $model->downloadLink(); ?> </span>
         </div>
     </div>
+
+    <hr>
+
     <div class="row">
         <div class="col-md-6">
-
             <?php
             echo DetailView::widget([
                 'model' => $model,
@@ -105,14 +107,6 @@ $owner = $model->created_by == Yii::$app->user->id;
 
             <br>
 
-            <?= $model->downloadLink(); ?>
-
-            <br>
-
-            <?= Html::a(Yii::t('files', 'Back to file overview'), ['index'], ['class' => 'btn btn-primary']); ?>
-
-            <br>
-
             <?php if ($owner) { ?>
                 <?php if ($model->public) { ?>
                     <div class="alert alert-warning"><p> <?= Yii::t('files', 'File is public'); ?>. </p></div>
@@ -128,7 +122,9 @@ $owner = $model->created_by == Yii::$app->user->id;
 
                     <br>
 
-                    <?= Html::a(Yii::t('files', 'Make public'), ['//files/file/publish', 'id' => $model->id], ['class' => 'btn btn-primary']); ?>
+                    <?= Html::a(Yii::t('files', 'Make public'), ['//files/file/publish', 'id' => $model->id], [
+                            'data-confirm' => Yii::t('files', 'Are you sure to make this file available to the public?'),
+                            'class' => 'btn btn-primary']); ?>
 
                 <?php } ?>
 

@@ -3,7 +3,6 @@
 use thyseus\files\models\FileSearch;
 use yii\grid\GridView;
 use yii\helpers\Html;
-use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\models\SitecontentSearch */
@@ -20,8 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <hr>
 
-    <?php Pjax::begin(); ?>
-
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -30,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'tags',
                 'visible' => Yii::$app->getModule('files')->possibleTags,
                 'filter' => Yii::$app->getModule('files')->possibleTags,
-                'value' => function($model) {
+                'value' => function ($model) {
                     return $model->getTagsFormatted();
                 },
             ],
@@ -77,7 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     1 => Yii::t('files', 'Yes'),
                 ],
                 'attribute' => 'public',
-                'format' => 'html',
+                'format' => 'raw', # do not use 'format' => 'html' because the data-confirm attribute gets swallowed
                 'value' => function ($model) {
                     $owner = $model->created_by == Yii::$app->user->id;
                     if ($owner) {
@@ -87,21 +84,19 @@ $this->params['breadcrumbs'][] = $this->title;
                                 . '.<br />'
                                 . Html::a(
                                     Yii::t('files', 'Make protected'),
-                                    ['//files/file/protect', 'id' => $model->id],
-                                    ['data-pjax' => '0']);
+                                    ['//files/file/protect', 'id' => $model->id]);
                         } else {
                             return '<span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> '
                                 . Yii::t('files', 'File is protected')
                                 . '.<br />'
                                 . Html::a(
                                     Yii::t('files', 'Configure shares'),
-                                    ['//files/file/view', 'id' => $model->id],
-                                    ['data-pjax' => '0'])
+                                    ['//files/file/view', 'id' => $model->id])
                                 . '<br />'
                                 . Html::a(
                                     Yii::t('files', 'Make public'),
                                     ['//files/file/publish', 'id' => $model->id],
-                                    ['data-pjax' => '0']);
+                                    ['data-confirm' => Yii::t('files', 'Are you sure to make this file available to the public?')]);
                         }
                     }
                 }
@@ -143,14 +138,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     $actions .= $model->downloadLink() . '<br>';
                     $actions .= '<nobr>' . Html::a(
                             '<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> ' . Yii::t('files', 'Properties'),
-                            ['//files/file/view', 'id' => $model->slug], [
-                            'data-pjax' => '0',
-                        ]) . '</nobr><br>';
+                            ['//files/file/view', 'id' => $model->slug]) . '</nobr><br>';
                     if ($owner) {
                         $actions .= '<nobr>' . Html::a(
                                 '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> ' . Yii::t('files', 'Delete File'),
                                 ['//files/file/delete', 'id' => $model->slug], [
-                                'data-pjax' => '0',
                                 'data-method' => 'POST',
                                 'data-confirm' => Yii::t('files', 'Are you Sure?'),
                             ]) . '</nobr>';
@@ -161,5 +153,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
-    <?php Pjax::end(); ?>
 </div>

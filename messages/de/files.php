@@ -63,4 +63,5 @@ return [
     'Tags have been updated' => 'Tags wurden aktualisiert',
     'Target Url' => 'Ziel-URL',
     'Checksum' => 'Prüfsumme',
+    'Are you sure to make this file available to the public?' => 'Sind Sie sicher, dass Sie diese Datei veröffentlichen wollen?',
 ];

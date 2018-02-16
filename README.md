@@ -50,7 +50,7 @@ yii2-shell:
 ```php
 foreach(thyseus\files\models\File::find()->all() as $file) {
     if (!$file->checksum) {
-        $file->updateAttributes(['checksum' => md5(file_get_contents($file->filename_path))]);
+        $file->updateAttributes(['checksum' => md5(@file_get_contents($file->filename_path))]);
     }
 }
 ```
