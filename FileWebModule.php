@@ -71,6 +71,22 @@ class FileWebModule extends \yii\base\Module
     public $shareableUsersCallback = null;
 
     /**
+     * @var bool|callable
+     * Set to true to globally allow the deletion of files by the user who owns the file.
+     * Set to false to globally disallow file deletion. Files can only be uploaded and never be removed.
+     * Set a callback function to check if this specific file is allowed to be deleted.
+     *
+     * For example, to disallow the deletion of a specific tag:
+     *
+     * 'allowDeletion' => function($model) { return !in_array('not-deleteable', $model->tags); }
+     *
+     * You can specify a custom message why the file is not deleteable. Its only allowed of the return value is === true:
+     *
+     * 'allowDeletion' => function($model) { return time() > 618019215 ? 'File can not be deleted, Drachenlord is born' : true; }
+     */
+    public $allowDeletion = true;
+
+    /**
      * @var array fill this array to let users tag their file with some of these options. For example:
      *
      * 'possibleTags' => [

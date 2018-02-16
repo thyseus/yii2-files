@@ -155,10 +155,11 @@ $owner = $model->created_by == Yii::$app->user->id;
 
                 <hr>
 
-                <?= Html::a(Yii::t('files', 'Remove file'), ['/files/file/delete', 'id' => $model->id],
-                    ['class' => 'btn btn-danger', 'data-confirm' => 'Are you sure?']);
-
-                ?>
+                <?php if ($owner && $model->isDeleteable()) { ?>
+                    <?= Html::a(Yii::t('files', 'Remove file'), ['/files/file/delete', 'id' => $model->id],
+                        ['class' => 'btn btn-danger', 'data-confirm' => 'Are you sure?']);
+                    ?>
+                <?php } ?>
 
             <?php } ?>
         </div>

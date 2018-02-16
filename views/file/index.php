@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $actions .= '<nobr>' . Html::a(
                             '<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> ' . Yii::t('files', 'Properties'),
                             ['//files/file/view', 'id' => $model->slug]) . '</nobr><br>';
-                    if ($owner) {
+                    if ($owner && $model->isDeleteable()) {
                         $actions .= '<nobr>' . Html::a(
                                 '<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> ' . Yii::t('files', 'Delete File'),
                                 ['//files/file/delete', 'id' => $model->slug], [

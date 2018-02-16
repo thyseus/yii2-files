@@ -481,24 +481,39 @@ class FileController extends Controller
     }
 
     /**
-     * Deletes an existing File model.
+     * Deletes an existing File model, if it is allowed.
      * If deletion is successful, the browser will be redirected to the referrer.
      * @param string $id
      * @return mixed
      */
     public function actionDelete($id)
     {
+        $allowDeletion = $this->module->allowDeletion;
+
+        if ($allowDeletion === false) {
+            throw new ForbiddenHttpException(Yii::t('files', 'The deletion of files has been deactivated globally'));
+        }
+
         $this->trigger(self::EVENT_BEFORE_DELETE);
 
         $file = $this->findModel($id);
 
-        if (Yii::$app->user->id == $file->created_by || Yii::$app->user->can('admin')) {
-            $file->delete();
-        } else {
-            throw new ForbiddenHttpException;
+        if (is_callable($allowDeletion)) {
+            $allowDeletionResult = call_user_func($allowDeletion, $file);
+
+            if ($allowDeletionResult === false) {
+                throw new ForbiddenHttpException(Yii::t('files', 'The deletion of this file is not allowed'));
+            } else if ($allowDeletionResult !== true && is_string($allowDeletionResult)) {
+                throw new ForbiddenHttpException(Yii::t('files', $allowDeletionResult));
+            }
         }
 
-        $this->trigger(self::EVENT_AFTER_DELETE);
+        if (Yii::$app->user->id == $file->created_by || Yii::$app->user->can('admin')) {
+            $file->delete();
+            $this->trigger(self::EVENT_AFTER_DELETE);
+        } else {
+            throw new ForbiddenHttpException(Yii::t('files', 'You are not the owner of this file'));
+        }
 
         return $this->redirect(Yii::$app->request->referrer);
     }

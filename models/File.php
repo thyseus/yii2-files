@@ -352,6 +352,25 @@ class File extends ActiveRecord
         return $this->hasOne($targetClass::className(), [$identifier_attribute => 'target_id']);
     }
 
+    public function isDeleteable()
+    {
+        $allowDeletion = Yii::$app->getModule('files')->allowDeletion;
+
+        if ($allowDeletion === true) {
+            return true;
+        }
+
+        if ($allowDeletion === false) {
+            return false;
+        }
+
+        if (is_callable($allowDeletion)) {
+            return call_user_func($allowDeletion, $this) === true;
+        }
+
+        return $allowDeletion;
+    }
+
     /**
      * Checks the mimeType of the $file against the list in the [[mimeTypes]] property.
      * borrowed from: https://github.com/yiisoft/yii2/blob/master/framework/validators/FileValidator.php#L479

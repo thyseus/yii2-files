@@ -64,4 +64,7 @@ return [
     'Target Url' => 'Ziel-URL',
     'Checksum' => 'Prüfsumme',
     'Are you sure to make this file available to the public?' => 'Sind Sie sicher, dass Sie diese Datei veröffentlichen wollen?',
+    'The deletion of files has been deactivated globally' => 'Das Löschen von Dateien wurde global deaktiviert',
+    'The deletion of this file is not allowed' => 'Das Löschen dieser Datei ist nicht erlaubt',
+    'You are not the owner of this file' => 'Sie sind nicht der Besitzer dieser Datei',
 ];
