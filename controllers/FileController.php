@@ -375,7 +375,7 @@ class FileController extends Controller
         $event->files = $fileModels;
         $this->trigger(self::EVENT_AFTER_UPLOAD, $event);
 
-        echo json_encode($output);
+        return json_encode($output);
     }
 
     /**
