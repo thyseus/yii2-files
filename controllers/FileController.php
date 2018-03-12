@@ -253,7 +253,7 @@ class FileController extends Controller
             header("Content-Disposition: attachment; filename=\"$model->filename_user\"");
         }
 
-        echo readfile($model->filename_path);
+        return readfile($model->filename_path);
 
         $model->updateCounters(['download_count' => 1]);
     }
