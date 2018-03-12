@@ -240,17 +240,17 @@ class FileController extends Controller
         if (!$model->proofChecksum()) {
             throw new NotFoundHttpException(Yii::t('files',
                 'Error: failed checksum check. The file or checksum has been changed after upload. File integrity can note be ensured. Download aborted. Please contact the System Administrator.'));
-            return false;
         }
 
-        header("Content-Type: $model->mimetype");
+        Yii::$app->response->headers->add('Content-Type', $model->mimetype);
 
         if (!file_exists($model->filename_path)) {
             throw new NotFoundHttpException;
         }
 
         if (!$raw) {
-            header("Content-Disposition: attachment; filename=\"$model->filename_user\"");
+            Yii::$app->response->headers->add('Content-Disposition', 'attachment');
+            Yii::$app->response->headers->add('filename', $model->filename_user);
         }
 
         return readfile($model->filename_path);
@@ -299,8 +299,7 @@ class FileController extends Controller
         $this->trigger(self::EVENT_BEFORE_UPLOAD);
 
         if (empty($_FILES['files'])) {
-            echo json_encode(['error' => Yii::t('files', 'No files found for upload.')]);
-            return;
+            return json_encode(['error' => Yii::t('files', 'No files found for upload.')]);
         }
 
         $files = $_FILES['files'];
