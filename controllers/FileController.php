@@ -356,7 +356,12 @@ class FileController extends Controller
         }
 
         if ($success === true) {
-            $output = [];
+            $attributes = [];
+            foreach ($fileModels as $fileModel) {
+                $attributes[$fileModel->id] = $fileModel->attributes;
+
+            }
+            $output = ['fileModels' => $attributes];
         } else {
             $output = ['error' => Yii::t('files', 'Error while uploading files. Please contact the system administrator.')];
 

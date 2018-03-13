@@ -44,7 +44,7 @@ $owner = $model->created_by == Yii::$app->user->id;
                                     $caption = $model->target->$identifierAttribute;
                                 }
 
-                                if (method_exists($model, '__toString')) {
+                                if (method_exists($model, '__toString()')) {
                                     $caption = $model->target->__toString();
                                 }
 
