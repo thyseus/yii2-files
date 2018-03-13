@@ -242,20 +242,17 @@ class FileController extends Controller
                 'Error: failed checksum check. The file or checksum has been changed after upload. File integrity can note be ensured. Download aborted. Please contact the System Administrator.'));
         }
 
-        Yii::$app->response->headers->add('Content-Type', $model->mimetype);
-
         if (!file_exists($model->filename_path)) {
             throw new NotFoundHttpException;
         }
 
-        if (!$raw) {
-            Yii::$app->response->headers->add('Content-Disposition', 'attachment');
-            Yii::$app->response->headers->add('filename', $model->filename_user);
-        }
-
-        return readfile($model->filename_path);
-
         $model->updateCounters(['download_count' => 1]);
+
+        if ($raw) {
+            return Yii::$app->response->sendContentAsFile(file_get_contents($model->filename_path), $model->filename_user);
+        } else {
+            return Yii::$app->response->sendFile($model->filename_path, $model->filename_user);
+        }
     }
 
     /**
