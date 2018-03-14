@@ -121,6 +121,7 @@ class File extends ActiveRecord
                 'class' => SluggableBehavior::className(),
                 'attribute' => 'filename_user',
                 'ensureUnique' => true,
+                'immutable' => true,
             ],
         ];
     }
