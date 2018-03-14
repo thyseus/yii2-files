@@ -268,7 +268,6 @@ class File extends ActiveRecord
         return $output;
     }
 
-
     /**
      * @return bool if the file is valid; always true if the check is being skipped
      */
@@ -281,9 +280,14 @@ class File extends ActiveRecord
         return $this->checksum == md5(file_get_contents($this->filename_path));
     }
 
+    /**
+     * Create the checksum only once when uploading the file. Never ever change it afterwards.
+     */
     protected function createChecksum()
     {
-        $this->checksum = md5($this->content);
+        if (!$this->checksum) {
+            $this->checksum = md5($this->content);
+        }
     }
 
     protected function handleSerializableFields()
