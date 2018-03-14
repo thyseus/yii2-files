@@ -123,7 +123,7 @@ class FileWebModule extends \yii\base\Module
 
         if (!isset(Yii::$app->get('i18n')->translations['files*'])) {
             Yii::$app->get('i18n')->translations['files*'] = [
-                'class' => PhpMessageSource::className(),
+                'class' => PhpMessageSource::class,
                 'basePath' => __DIR__ . '/messages',
                 'sourceLanguage' => 'en-US'
             ];

@@ -77,7 +77,7 @@ use \thyseus\files\behaviors\HasFilesBehavior;
     public function behaviors()
     {
         return [
-                HasFilesBehavior::className(),
+                HasFilesBehavior::class,
                 ];
     }
 ```
@@ -121,7 +121,7 @@ access to a shared file, like this:
 use yii\base\Event;
 use thyseus\files\controllers\FileController;
 
-Event::on(FileController::className(), FileController::EVENT_AFTER_SHARE_WITH_USER, function ($event) {
+Event::on(FileController::class, FileController::EVENT_AFTER_SHARE_WITH_USER, function ($event) {
     $username = $event->sender->actionParams['username'];
     
     Message::sendNotification($username); // <-- you need to implement this

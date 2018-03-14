@@ -134,7 +134,7 @@ $owner = $model->created_by == Yii::$app->user->id;
 
                     <?php $form = ActiveForm::begin(['id' => 'file-tags-form']); ?>
 
-                    <?= $form->field($model, 'tags')->widget(Select2::classname(), [
+                    <?= $form->field($model, 'tags')->widget(Select2::class, [
                         'data' => File::possibleTagsTranslated(),
                         'options' => [
                             'placeholder' => Yii::t('files', 'Select tags'),

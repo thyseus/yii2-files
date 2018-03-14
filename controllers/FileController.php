@@ -51,7 +51,7 @@ class FileController extends Controller
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
+                'class' => AccessControl::class,
                 'rules' => [
                     [
                         'allow' => true,
@@ -68,7 +68,7 @@ class FileController extends Controller
             ],
 
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'share_with_user' => ['POST'],
                 ],
@@ -325,7 +325,7 @@ class FileController extends Controller
 
                 if (move_uploaded_file($file['tmp_name'], $target)) {
                     $file = Yii::createObject([
-                        'class' => File::className(),
+                        'class' => File::class,
                         'attributes' => [
                             'content' => $content,
                             'filename_user' => $file['name'],
