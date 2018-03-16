@@ -15,7 +15,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= Html::a(Yii::t('files', 'Upload new File'), ['upload'], ['class' => 'btn btn-primary']); ?>
+    <?= Html::a(Yii::t('files', 'Upload new File'), ['upload'], ['class' => 'btn btn-primary']); ?>&nbsp;
+
+    <?= Html::a(Yii::t('files', 'Trash bin'), ['trash-bin'], ['class' => 'btn btn-primary']); ?>
 
     <hr>
 

@@ -24,11 +24,18 @@ use yii\helpers\Url;
  */
 class File extends ActiveRecord
 {
+    use CropTrait;
+
+    const STATUS_DELETED = -2; # Restoration not possible anymore. File could be shared with other people, they still have access!
+    const STATUS_TRASHED = -1; # Only mark as deleted, can be restored
+    const STATUS_NORMAL = 0; # solely owner
+
     const EVENT_BEFORE_SHARE_WITH_USER = 'before_share_with_user';
     const EVENT_AFTER_SHARE_WITH_USER = 'after_share_with_user';
 
     /**
-     * @var $content in order to generate the md5 sum of the file the content is temporarily saved here
+     * @var $content in order to generate the md5 sum of the file the content is temporarily saved here.
+     * Does cost much memory when using big files - ideas on how to do this better are always welcome.
      */
     public $content;
 
@@ -71,41 +78,6 @@ class File extends ActiveRecord
         return strpos($this->mimetype, 'image') !== false;
     }
 
-    /**
-     * Crop the image to the dimensions given in FileWebModule->crop_target_{width/height} using Imagine.
-     * Thanks to http://www.yiiframework.com/wiki/859/how-to-resize-an-image-proportionally/
-     */
-    public function crop()
-    {
-        $imagine = \yii\imagine\Image::getImagine();
-
-        $width = Yii::$app->getModule('files')->crop_target_width;
-        $height = Yii::$app->getModule('files')->crop_target_height;
-
-        $image = $imagine->open($this->filename_path);
-
-        $size = new \Imagine\Image\Box($width, $height);
-        $resized_image = $image->thumbnail($size, \Imagine\Image\ImageInterface::THUMBNAIL_INSET);
-
-        $sizeR = $resized_image->getSize();
-        $widthR = $sizeR->getWidth();
-        $heightR = $sizeR->getHeight();
-        $preserve = $imagine->create($size);
-
-        $startX = $startY = 0;
-
-        if ($widthR < $width) {
-            $startX = ($width - $widthR) / 2;
-        }
-
-        if ($heightR < $height) {
-            $startY = ($height - $heightR) / 2;
-        }
-
-        $preserve
-            ->paste($resized_image, new \Imagine\Image\Point($startX, $startY))
-            ->save($this->filename_path, ['quality' => 100]);
-    }
 
     public function behaviors()
     {
@@ -173,16 +145,42 @@ class File extends ActiveRecord
     }
 
     /**
+     * When files are being deleted by the user, we first send it into a temporary trash bin.
+     * Files inside this bin have the status STATUS_TRASHED. They can be restored by the
+     * user anytime.
+     *
+     * When he empties his trash bin, the files inside it get the status STATUS_DELETED. They
+     * can not be restored anymore and are never displayed.
+     *
+     * We still keep it in our database (soft delete).
+     *
      * Ensure that files are also removed physically from the hard drive when the option
      * is set in the module configuration
      */
-    public function afterDelete()
+    public function delete()
     {
-        if (Yii::$app->getModule('files')->deletePhysically) {
-            unlink($this->filename_path);
+        if ($this->status == File::STATUS_NORMAL) {
+            $this->updateAttributes(['status' => File::STATUS_TRASHED]);
         }
 
-        parent::afterDelete();
+        if ($this->status == File::STATUS_TRASHED) {
+            $this->updateAttributes(['status' => File::STATUS_DELETED]);
+        }
+
+    }
+
+    /**
+     * Restoration is only possible when the file has the status STATUS_TRASHED.
+     * @return bool succeeded?
+     */
+    public function restore()
+    {
+        if ($this->status == File::STATUS_TRASHED) {
+            $this->updateAttributes(['status' => File::STATUS_NORMAL]);
+            return true;
+        }
+
+        return false;
     }
 
     public function addShareWith($username)

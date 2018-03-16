@@ -12,6 +12,8 @@ use app\models\User;
  */
 class FileSearch extends File
 {
+    public $trash = false;
+
     /**
      * @return array a grouped list of targets of all files that the user has been access to
      * Provide -1 to get ALL targets in the system. Useful for the administrator view.
@@ -139,6 +141,14 @@ class FileSearch extends File
             'status' => $this->status,
             'target_id' => $this->target_id,
         ]);
+
+        if ($this->trash) {
+            $query->andFilterWhere(['status' => File::STATUS_TRASHED]);
+        } else {
+            $query->andWhere(['!=' ,'status' , File::STATUS_TRASHED]);
+        }
+
+        $query->andWhere(['!=' ,'status' , File::STATUS_DELETED]);
 
         if ($this->created_by == -2) { # files shared with me
             $query->andFilterWhere([

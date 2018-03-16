@@ -10,7 +10,7 @@ use yii\i18n\PhpMessageSource;
  */
 class FileWebModule extends \yii\base\Module
 {
-    public $version = '0.3.0';
+    public $version = '0.5.0-dev';
 
     /**
      * @inheritdoc
@@ -23,11 +23,6 @@ class FileWebModule extends \yii\base\Module
      * @var string The class of the User Model inside the application this module is attached to
      */
     public $userModelClass = 'app\models\User';
-
-    /**
-     * @var boolean Should the file also be deleted physically on removal ?
-     */
-    public $deletePhysically = false;
 
     /**
      * @var string Url to upload files.
@@ -76,6 +71,9 @@ class FileWebModule extends \yii\base\Module
      * Set to false to globally disallow file deletion. Files can only be uploaded and never be removed.
      * Set a callback function to check if this specific file is allowed to be deleted.
      *
+     * Note that files first go into a trash bin and can be restored. To finally delete them, the
+     * user has to empty his trash bin manually.
+     *
      * For example, to disallow the deletion of a specific tag:
      *
      * 'allowDeletion' => function($model) { return !in_array('not-deleteable', $model->tags); }
@@ -105,11 +103,13 @@ class FileWebModule extends \yii\base\Module
 
     /** @var array The rules to be used in URL management. */
     public $urlRules = [
-        'files/update/<id>' => 'files/files/update',
-        'files/delete/<id>' => 'files/files/delete',
-        'files/<id>' => 'files/files/view',
-        'files/index' => 'files/files/index',
-        'files/create' => 'files/files/create',
+        'files/trash-bin' => 'files/file/trash-bin',
+        'files/restore/<id>' => 'files/file/restore',
+        'files/update/<id>' => 'files/file/update',
+        'files/delete/<id>' => 'files/file/delete',
+        'files/<id>' => 'files/file/view',
+        'files/index' => 'files/file/index',
+        'files/create' => 'files/file/create',
     ];
 
     /**

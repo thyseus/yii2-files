@@ -1,3 +1,4 @@
+tobereleased, v0.5.0 - introduce trash bin
 2017-12-18, v0.4.0: introduce checksum. See README.md for update instructions
 2017-10-12, v0.3.0: introduce shared_with feature, introduce tags, use slugs to identify files
 2017-09-20, v0.2.1: add download_count to files to track the num of downloads

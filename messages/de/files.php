@@ -67,4 +67,13 @@ return [
     'The deletion of files has been deactivated globally' => 'Das Löschen von Dateien wurde global deaktiviert',
     'The deletion of this file is not allowed' => 'Das Löschen dieser Datei ist nicht erlaubt',
     'You are not the owner of this file' => 'Sie sind nicht der Besitzer dieser Datei',
+    'Trash' => 'Papierkorb',
+    'Trash bin' => 'Papierkorb',
+    'Restore' => 'Wiederherstellen',
+    'Empty trash' => 'Papierkorb leeren',
+    'Are you sure you want to remove all files in your trash bin permanently?' => 'Sind Sie sicher, dass Sie alle Dateien aus ihrem Papierkorb endgültig entfernen wollen?',
+    'The File has been restored from your trash bin.' => 'Die Datei wurde aus ihrem Papierkorb wiederhergestellt.',
+    'Are you sure to permanently remove this file? It can never be restored anymore.' => 'Sind Sie sicher, dass Sie diese Datei endgültig entfernen wollen?',
+    'Your trash has been emptied.' => 'Ihr Papierkorb wurde geleert.',
+    'Remove permanent' => 'Endgültig löschen',
 ];

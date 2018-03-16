@@ -35,6 +35,9 @@ class FileController extends Controller
     const EVENT_BEFORE_DELETE = 'before_delete';
     const EVENT_AFTER_DELETE = 'after_delete';
 
+    const EVENT_BEFORE_RESTORE = 'before_restore';
+    const EVENT_AFTER_RESTORE = 'after_restore';
+
     const EVENT_BEFORE_PUBLISH = 'before_publish';
     const EVENT_AFTER_PUBLISH = 'after_publish';
 
@@ -61,7 +64,9 @@ class FileController extends Controller
                     [
                         'allow' => true,
                         'actions' => ['index', 'view', 'delete', 'upload', 'upload-raw',
-                            'download', 'protect', 'publish', 'crop', 'move', 'share-with-user'],
+                            'download', 'protect', 'publish', 'crop', 'move', 'share-with-user',
+                            'trash-bin', 'restore',
+                            ],
                         'roles' => ['@'],
                     ],
                 ],
@@ -153,6 +158,24 @@ class FileController extends Controller
     }
 
     /**
+     * Shows all Files that are in the trash bin.
+     * @return mixed
+     */
+    public function actionTrashBin()
+    {
+        $searchModel = new FileSearch();
+        $searchModel->trash = true;
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        Yii::$app->user->setReturnUrl(['//files/file/trash-bin']);
+
+        return $this->render('trash', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
      * Allow users to crop their uploaded images. Uses https://github.com/demisang/yii2-cropper
      * @return mixed
      */
@@ -169,6 +192,33 @@ class FileController extends Controller
         $this->trigger(self::EVENT_BEFORE_CROP);
 
         return $this->render('crop', ['model' => $model]);
+    }
+
+    /**
+     * Restores a file from the trash bin.
+     * @return mixed
+     */
+    public function actionRestore($id)
+    {
+        $this->trigger(self::EVENT_BEFORE_RESTORE);
+
+        $model = $this->findModel($id);
+
+        if (Yii::$app->user->id != $model->created_by && !Yii::$app->user->can('admin')) {
+            throw new ForbiddenHttpException;
+        }
+
+        if ($model->restore()) {
+            Yii::$app->getSession()->setFlash('success',
+                Yii::t('files', 'The File has been restored from your trash bin.'));
+        } else {
+            Yii::$app->getSession()->setFlash('error',
+                Yii::t('files', 'File could not be restored.'));
+        }
+
+        $this->trigger(self::EVENT_AFTER_RESTORE);
+
+        return $this->goBack(Yii::$app->request->referrer);
     }
 
     /**
@@ -195,7 +245,7 @@ class FileController extends Controller
 
         $this->trigger(self::EVENT_AFTER_PUBLISH);
 
-        return $this->redirect(Yii::$app->request->referrer);
+        return $this->goBack(Yii::$app->request->referrer);
     }
 
     /**
@@ -483,6 +533,9 @@ class FileController extends Controller
 
     /**
      * Deletes an existing File model, if it is allowed.
+     *
+     * Supply 'remove-all-files-from-trash-bin' as id to remove all files from your trash bin.
+     *
      * If deletion is successful, the browser will be redirected to the referrer.
      * @param string $id
      * @return mixed
@@ -496,6 +549,14 @@ class FileController extends Controller
         }
 
         $this->trigger(self::EVENT_BEFORE_DELETE);
+
+        if ($id == 'remove-all-files-from-trash-bin') {
+            File::emptyTrashBin();
+            Yii::$app->getSession()->setFlash('success',
+                Yii::t('files', 'Your trash has been emptied.'));
+
+            return $this->goBack(Yii::$app->request->referrer);
+        }
 
         $file = $this->findModel($id);
 
@@ -516,6 +577,6 @@ class FileController extends Controller
             throw new ForbiddenHttpException(Yii::t('files', 'You are not the owner of this file'));
         }
 
-        return $this->redirect(Yii::$app->request->referrer);
+        return $this->goBack(Yii::$app->request->referrer);
     }
 }
