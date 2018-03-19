@@ -1,5 +1,6 @@
 <?php
 
+use thyseus\files\models\File;
 use thyseus\files\models\FileSearch;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -17,9 +18,17 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= Html::a(Yii::t('files', 'Files'), ['index'], ['class' => 'btn btn-primary']); ?>
 
-    <?= Html::a(Yii::t('files', 'Empty trash'), ['delete', 'id' => 'remove-all-files-from-trash-bin'], [
+
+    <?php if (File::find()->where([
+            'status' => File::STATUS_TRASHED,
+            'created_by' => Yii::$app->user->id,
+        ])->count() > 0) { ?>
+        <?= Html::a(
+            Yii::t('files', 'Empty trash'),
+            ['delete', 'id' => 'remove-all-files-from-trash-bin'], [
             'data-confirm' => Yii::t('files', 'Are you sure you want to remove all files in your trash bin permanently?'),
             'class' => 'btn btn-primary']); ?>
+    <?php } ?>
 
     <hr>
 
@@ -34,7 +43,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'filename_user',
             [
-                'filter' => Yii::$app->user->can('admin') ? FileSearch::targetsGrouped(-1) : FileSearch::targetsGrouped(),
+                'filter' => Yii::$app->user->can('admin')
+                    ? FileSearch::targetsGrouped(-1)
+                    : FileSearch::targetsGrouped(),
                 'format' => 'html',
                 'attribute' => 'target_id',
                 'value' => function ($data) {
@@ -64,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $actions = '';
 
                     $actions .= Html::a(Yii::t('files', 'Restore'),
-                            ['//files/file/restore', 'id' => $model->slug]);
+                        ['//files/file/restore', 'id' => $model->slug]);
 
                     $actions .= '<br>';
 

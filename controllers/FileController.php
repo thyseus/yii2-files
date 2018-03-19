@@ -551,7 +551,8 @@ class FileController extends Controller
         $this->trigger(self::EVENT_BEFORE_DELETE);
 
         if ($id == 'remove-all-files-from-trash-bin') {
-            File::emptyTrashBin();
+            File::emptyTrashBin(Yii::$app->user->id);
+
             Yii::$app->getSession()->setFlash('success',
                 Yii::t('files', 'Your trash has been emptied.'));
 

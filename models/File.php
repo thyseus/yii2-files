@@ -160,11 +160,11 @@ class File extends ActiveRecord
     public function delete()
     {
         if ($this->status == File::STATUS_NORMAL) {
-            $this->updateAttributes(['status' => File::STATUS_TRASHED]);
+            return $this->updateAttributes(['status' => File::STATUS_TRASHED]);
         }
 
         if ($this->status == File::STATUS_TRASHED) {
-            $this->updateAttributes(['status' => File::STATUS_DELETED]);
+            return $this->updateAttributes(['status' => File::STATUS_DELETED]);
         }
 
     }
@@ -398,5 +398,21 @@ class File extends ActiveRecord
             }
         }
         return false;
+    }
+
+    /**
+     * Remove all files that are in the trash bin permanently.
+     *
+     * @param $user_id
+     * @return int
+     */
+    public static function emptyTrashBin($user_id)
+    {
+        foreach (File::find()->where([
+            'status' => File::STATUS_TRASHED,
+            'created_by' => $user_id,
+        ])->all() as $file) {
+            $file->delete();
+        }
     }
 }
