@@ -82,14 +82,14 @@ class File extends ActiveRecord
     public function behaviors()
     {
         return [
-            [
+            'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'value' => date('Y-m-d G:i:s'),
             ],
-            [
+            'blameable' => [
                 'class' => BlameableBehavior::class,
             ],
-            [
+            'sluggable' => [
                 'class' => SluggableBehavior::class,
                 'attribute' => 'filename_user',
                 'ensureUnique' => true,
