@@ -99,7 +99,7 @@ class FileDownloadService
                 'created_by' => $this->user_id ? $this->user_id : Yii::$app->user->id,
                 'updated_by' => $this->user_id ? $this->user_id : Yii::$app->user->id,
                 'mimetype' => mime_content_type($target),
-                'public' => $this->public,
+                'public' => (int) $this->public, # needs to be integer
                 'tags' => $this->tags,
             ],
         ]);
