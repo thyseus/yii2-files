@@ -1,3 +1,11 @@
+# ATTENTION:
+
+github has been bought by Microsoft. This repository is orphaned and has been moved to:
+
+https://gitlab.com/thyseus/yii2-files
+
+Thanks a lot for your understanding and blame Microsoft.
+
 # Yii2-files
 
 A General File Upload Manager for the Yii 2 framework.
